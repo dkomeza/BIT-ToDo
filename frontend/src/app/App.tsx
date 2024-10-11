@@ -1,12 +1,12 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { lazy, Suspense } from "react";
+import Dashboard from "./pages/Dashboard";
 
 function App() {
   return (
     <>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Navigate to="/login" />} />
+          <Route path="/" element={<Dashboard />} />
 
           {/* Authentication routes */}
           <Route path="/login" element={<h1>Login</h1>} />
