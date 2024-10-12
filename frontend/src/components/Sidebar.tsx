@@ -9,42 +9,14 @@ import {
 
 import { Button } from "@/components/ui/button";
 import {
-  DragHandleDots2Icon,
   HamburgerMenuIcon,
   PlusIcon,
 } from "@radix-ui/react-icons";
-import AccountDropdown from "./AccountDropdown";
-import {
-  closestCenter,
-  DndContext,
-  PointerSensor,
-  useSensor,
-  useSensors,
-} from "@dnd-kit/core";
-import { CSS } from "@dnd-kit/utilities";
-import {
-  arrayMove,
-  SortableContext,
-  useSortable,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
-import {
-  restrictToWindowEdges,
-  restrictToVerticalAxis,
-} from "@dnd-kit/modifiers";
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import AccountDropdown from "./sidebar/AccountDropdown";
+
+import Lists from "./sidebar/Lists";
 
 function Sidebar() {
-  const [lists, setLists] = useState([
-    "Home",
-    "Personal",
-    "School",
-    "Work",
-    "Shopping",
-  ]);
-
-  const sensors = useSensors(useSensor(PointerSensor));
 
   return (
     <Sheet>
@@ -60,7 +32,7 @@ function Sidebar() {
         </Button>
       </div>
 
-      <SheetContent side={"left"}>
+      <SheetContent side={"left"} className="w-4/5">
         <SheetHeader className="mt-6">
           <SheetTitle className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -78,84 +50,15 @@ function Sidebar() {
         </SheetHeader>
         <div className="flex flex-col gap-4 mt-8 pl-2">
           <h3 className="text-2xl font-bold">Lists</h3>
-          <div className="ml-2 flex flex-col">
-            <DndContext
-              sensors={sensors}
-              collisionDetection={closestCenter}
-              onDragEnd={handleDragEnd}
-              modifiers={[restrictToWindowEdges, restrictToVerticalAxis]}
-            >
-              <SortableContext
-                items={lists}
-                strategy={verticalListSortingStrategy}
-              >
-                {lists.map((list) => (
-                  <SortableItem key={list} id={list} />
-                ))}
-              </SortableContext>
-            </DndContext>
-          </div>
+          <Lists />
+          
         </div>
       </SheetContent>
     </Sheet>
   );
 
-  function handleDragEnd(event: any) {
-    const { active, over } = event;
-
-    if (active.id !== over.id) {
-      setLists((items) => {
-        const oldIndex = items.indexOf(active.id);
-        const newIndex = items.indexOf(over.id);
-
-        return arrayMove(items, oldIndex, newIndex);
-      });
-    }
-  }
+ 
 }
 
-function SortableItem({ id }: { id: string }) {
-  const router = useNavigate();
-
-  const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-  };
-
-  return (
-    <div
-      className="flex items-center justify-between hover:bg-accent mb-2 rounded-sm pr-2 cursor-pointer"
-      ref={setNodeRef}
-      style={style}
-      onClick={() => {
-        router(`/lists/${id}`);
-      }}
-    >
-      <div className="flex items-center">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={(e) => {
-            console.log("CHuj");
-            e.preventDefault();
-            e.stopPropagation();
-          }}
-          {...listeners}
-          {...attributes}
-          style={{ backgroundColor: "transparent" }}
-        >
-          <DragHandleDots2Icon className="text-muted-foreground" />
-        </Button>
-        <p className="text-lg font-bold ml-2">{id}</p>
-      </div>
-      <div className="bg-accent text-accent-foreground w-6 h-6 flex items-center justify-center text-xs rounded-sm">
-        99
-      </div>
-    </div>
-  );
-}
 
 export default Sidebar;
