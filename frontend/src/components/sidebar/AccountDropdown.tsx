@@ -10,6 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Link } from "react-router-dom";
 
 function AccountDropdown() {
   return (
@@ -31,7 +32,11 @@ function AccountDropdown() {
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="cursor-pointer">GitHub</DropdownMenuItem>
+        <DropdownMenuItem className="cursor-pointer">
+          <Link to="https://github.com/dkomeza/BIT-ToDo" target="_blank">
+            GitHub
+          </Link>
+        </DropdownMenuItem>
         <DropdownMenuItem className="cursor-pointer">Support</DropdownMenuItem>
         <DropdownMenuItem disabled>API</DropdownMenuItem>
         <DropdownMenuSeparator />
