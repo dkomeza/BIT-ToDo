@@ -10,11 +10,11 @@ import {
 import { Button } from "@/components/ui/button";
 import {
   HamburgerMenuIcon,
-  PlusIcon,
 } from "@radix-ui/react-icons";
 import AccountDropdown from "./sidebar/AccountDropdown";
 
 import Lists from "./sidebar/Lists";
+import NewTask from "./NewTask";
 
 function Sidebar() {
 
@@ -26,10 +26,7 @@ function Sidebar() {
             <HamburgerMenuIcon />
           </Button>
         </SheetTrigger>
-
-        <Button variant="outline" size="icon">
-          <PlusIcon />
-        </Button>
+        <NewTask />
       </div>
 
       <SheetContent side={"left"} className="w-4/5">

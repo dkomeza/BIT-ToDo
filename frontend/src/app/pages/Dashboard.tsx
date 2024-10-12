@@ -2,7 +2,7 @@ import dayjs from "dayjs";
 
 import Sidebar from "@/components/Sidebar";
 
-function Dashboard() {
+function Home() {
   return (
     <div className="flex flex-col sm:flex-row h-full px-4 py-6">
       <Sidebar />
@@ -18,4 +18,4 @@ function Dashboard() {
   );
 }
 
-export default Dashboard;
+export default Home;
