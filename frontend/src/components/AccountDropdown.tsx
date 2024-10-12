@@ -23,15 +23,23 @@ function AccountDropdown() {
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem>Profile</DropdownMenuItem>
-          <DropdownMenuItem>Settings</DropdownMenuItem>
+          <DropdownMenuItem className="cursor-pointer">
+            Profile
+          </DropdownMenuItem>
+          <DropdownMenuItem className="cursor-pointer">
+            Settings
+          </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>GitHub</DropdownMenuItem>
-        <DropdownMenuItem>Support</DropdownMenuItem>
+        <DropdownMenuItem className="cursor-pointer">GitHub</DropdownMenuItem>
+        <DropdownMenuItem className="cursor-pointer">Support</DropdownMenuItem>
         <DropdownMenuItem disabled>API</DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>Log out</DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Button variant="destructive" className="w-full justify-start">
+            Log out
+          </Button>
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
