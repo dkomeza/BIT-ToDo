@@ -9,11 +9,6 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { PlusIcon, CalendarIcon } from "@radix-ui/react-icons";
 
 import { useForm } from "react-hook-form";
@@ -34,6 +29,16 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "./ui/textarea";
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
 
 const formSchema = z.object({
   title: z.string().min(1, {
@@ -99,8 +104,8 @@ function NewTask() {
                 control={form.control}
                 name="date"
                 render={({ field }) => (
-                  <Popover>
-                    <PopoverTrigger asChild>
+                  <Dialog>
+                    <DialogTrigger asChild>
                       <Button
                         variant={"outline"}
                         className="w-full justify-start mt-4"
@@ -108,11 +113,11 @@ function NewTask() {
                         <CalendarIcon className="mr-2 h-4 w-4" />
                         {dayjs(field.value).format("dddd, DD MMMM YYYY")}
                       </Button>
-                    </PopoverTrigger>
-                    <PopoverContent
-                      align="start"
-                      className="flex w-auto flex-col space-y-2 p-2"
-                    >
+                    </DialogTrigger>
+                    <DialogContent className="flex w-auto flex-col p-2 py-4 rounded-md [&>button]:hidden">
+                      <DialogHeader>
+                        <DialogTitle>Select a date</DialogTitle>
+                      </DialogHeader>
                       <div className="flex flex-col">
                         <Button
                           className="flex justify-between"
@@ -157,7 +162,6 @@ function NewTask() {
                           </p>
                         </Button>
                       </div>
-                      {/* <div className="rounded-md border"> */}
                       <Calendar
                         mode="single"
                         selected={field.value}
@@ -165,9 +169,13 @@ function NewTask() {
                           form.setValue("date", date);
                         }}
                       />
-                      {/* </div> */}
-                    </PopoverContent>
-                  </Popover>
+                      <DialogFooter>
+                        <DialogClose asChild>
+                          <Button variant="default">Save</Button>
+                        </DialogClose>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
                 )}
               />
               <FormField
