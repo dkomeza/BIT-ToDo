@@ -16,7 +16,16 @@
     /* Linting */
     "skipLibCheck": true,
     "strict": true,
+    "strictPropertyInitialization": false, // For the typeorm entities :(
     "noFallthroughCasesInSwitch": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+
+    "baseUrl": "./",
+    "paths": {
+      "@/*": ["src/*"]
+    }
   }
 }
