@@ -4,9 +4,12 @@ import {
   PrimaryGeneratedColumn,
   ManyToOne,
   type Relation,
+  BeforeInsert,
+  BeforeUpdate,
 } from "typeorm";
 import { AppDataSource } from "@/config/db.config";
 import { User } from "./user.model";
+import { slugify } from "@/services/list.service";
 
 @Entity()
 export class List {
@@ -15,6 +18,9 @@ export class List {
 
   @Column({ type: "varchar", length: 255, unique: true })
   name!: string;
+
+  @Column({ type: "varchar", length: 255, unique: true })
+  slug!: string;
 
   @Column({ type: "text", nullable: true })
   description?: string;
@@ -33,6 +39,12 @@ export class List {
 
   @Column({ type: "boolean", default: false })
   isArchived!: boolean; // Archive a list if it's not actively used
+
+  @BeforeInsert()
+  @BeforeUpdate()
+  generateSlug() {
+    this.slug = slugify(this.name);
+  }
 }
 
 export async function createList(data: {
@@ -57,8 +69,14 @@ export async function createList(data: {
 export async function selectList(where: {
   id?: number;
   name?: string;
+  slug?: string;
   user?: User;
 }): Promise<List | null> {
+  // Either id or user and name or slug is required
+  if (!where.id && (!where.user || (!where.name && !where.slug))) {
+    throw new Error("ID or user and name or slug is required");
+  }
+
   const listRepository = AppDataSource.getRepository(List);
 
   const list = await listRepository.findOne({
