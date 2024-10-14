@@ -1,11 +1,19 @@
-import { Column, Entity, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
+import {
+  Column,
+  Entity,
+  OneToMany,
+  PrimaryColumn,
+  PrimaryGeneratedColumn,
+  type Relation,
+} from "typeorm";
 import { AppDataSource } from "@/config/db.config";
+import { List } from "./list.model";
 
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
   id: number;
-  @PrimaryColumn()
+  @PrimaryColumn({ unique: true })
   email: string;
   @Column()
   password: string;
@@ -13,9 +21,36 @@ export class User {
   name: string;
   @Column()
   surname: string;
+
+  @OneToMany(() => List, (list) => list.user) // Use forward reference
+  lists!: Relation<List>[];
+
+  @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
+  createdAt: Date;
+
+  @Column({
+    type: "timestamp",
+    default: () => "CURRENT_TIMESTAMP",
+    onUpdate: "CURRENT_TIMESTAMP",
+  })
+  updatedAt!: Date;
+
+  @Column({ default: false })
+  isVerified!: boolean;
+
+  @Column({ type: "varchar", length: 255, nullable: true })
+  resetPasswordToken?: string; // Token for resetting the password
+
+  @Column({ type: "timestamp", nullable: true })
+  resetPasswordExpires?: Date; // Expiry time for the reset password token
 }
 
-export async function createUser(data: Partial<User>): Promise<User> {
+export async function createUser(data: {
+  email: string;
+  password: string;
+  name: string;
+  surname: string;
+}): Promise<User> {
   const userRepository = AppDataSource.getRepository(User);
 
   const user = userRepository.create(data);
