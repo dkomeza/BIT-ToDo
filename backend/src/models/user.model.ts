@@ -13,7 +13,7 @@ import { List } from "./list.model";
 export class User {
   @PrimaryGeneratedColumn()
   id: number;
-  @PrimaryColumn({ unique: true })
+  @Column({ unique: true })
   email: string;
   @Column()
   password: string;

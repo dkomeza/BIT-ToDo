@@ -13,7 +13,7 @@ export class List {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column({ type: "varchar", length: 255 })
+  @Column({ type: "varchar", length: 255, unique: true })
   name!: string;
 
   @Column({ type: "text", nullable: true })
@@ -54,11 +54,15 @@ export async function createList(data: {
   return list;
 }
 
-export async function selectList({ id }: { id: number }): Promise<List | null> {
+export async function selectList(where: {
+  id?: number;
+  name?: string;
+  user?: User;
+}): Promise<List | null> {
   const listRepository = AppDataSource.getRepository(List);
 
   const list = await listRepository.findOne({
-    where: { id },
+    where,
   });
 
   return list;
