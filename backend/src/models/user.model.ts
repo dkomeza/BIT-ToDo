@@ -59,7 +59,11 @@ export async function createUser(data: {
   return user;
 }
 
-export async function getUser(where: Partial<User>): Promise<User | null> {
+export async function getUser(where: {
+  id?: number;
+  email?: string;
+  resetPasswordToken?: string;
+}): Promise<User | null> {
   const userRepository = AppDataSource.getRepository(User);
 
   const user = await userRepository.findOne({ where });
