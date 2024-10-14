@@ -22,7 +22,7 @@ afterEach(async () => {
 });
 
 function createTestUser() {
-  return fetch("http://localhost:8001/auth/register", {
+  return fetch("http://localhost:8001/auth/signup", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -61,7 +61,7 @@ describe("Register", () => {
   });
 
   test("Register a user with invalid data", async () => {
-    const response = await fetch("http://localhost:8001/auth/register", {
+    const response = await fetch("http://localhost:8001/auth/signup", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

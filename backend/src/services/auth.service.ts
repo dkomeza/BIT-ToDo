@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import { z } from "zod";
 
-import { getUser, createUser } from "@/models/user.model";
+import { getUser, createUser, User } from "@/models/user.model";
 
 export const RegisterDataSchema = z.object({
   name: z.string().min(1, { message: "Name is required" }),
@@ -20,7 +20,9 @@ export type LoginData = z.infer<typeof LoginDataSchema>;
 
 export type Token = string;
 
-export async function register(data: RegisterData): Promise<Token> {
+export async function register(
+  data: RegisterData
+): Promise<{ token: Token; user: User }> {
   const isEmailTaken = await getUser({ email: data.email });
 
   if (isEmailTaken) throw new Error("Email is already taken");
@@ -32,12 +34,16 @@ export async function register(data: RegisterData): Promise<Token> {
 
   const user = await createUser({ ...data, password: hashedPassword });
 
-  return jwt.sign({ id: user.id }, process.env.JWT_SECRET || "secret", {
+  const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET || "secret", {
     expiresIn: "1d",
   });
+
+  return { token, user };
 }
 
-export async function login(data: LoginData): Promise<Token> {
+export async function login(
+  data: LoginData
+): Promise<{ token: Token; user: User }> {
   const user = await getUser({ email: data.email });
 
   if (!user) throw new Error("Wrong email or password");
@@ -45,7 +51,9 @@ export async function login(data: LoginData): Promise<Token> {
     throw new Error("Wrong email or password");
   }
 
-  return jwt.sign({ id: user.id }, process.env.JWT_SECRET || "secret", {
+  const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET || "secret", {
     expiresIn: "1d",
   });
+
+  return { token, user };
 }

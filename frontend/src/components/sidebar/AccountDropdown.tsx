@@ -11,8 +11,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
 
 function AccountDropdown() {
+  const { logout } = useAuth();
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -41,7 +43,11 @@ function AccountDropdown() {
         <DropdownMenuItem disabled>API</DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Button variant="destructive" className="w-full justify-start">
+          <Button
+            variant="destructive"
+            className="w-full justify-start"
+            onClick={logout}
+          >
             Log out
           </Button>
         </DropdownMenuItem>

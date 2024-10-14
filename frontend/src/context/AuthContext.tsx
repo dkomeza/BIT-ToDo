@@ -8,14 +8,14 @@ type User = {
 
 interface AuthProvider {
   user: User | null;
-  login: (email: string, password: string) => void;
+  login: (email: string, password: string) => Promise<void>;
   register: (
     name: string,
     surname: string,
     email: string,
     password: string
-  ) => void;
-  logout: () => void;
+  ) => Promise<void>;
+  logout: () => Promise<void>;
 }
 
 export const AuthContext = createContext({} as AuthProvider);
@@ -33,14 +33,59 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     });
   }, []);
 
-  const login = (email: string, password: string) => {};
-  const register = (
+  const login = async (email: string, password: string) => {
+    const res = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, password }),
+    });
+
+    if (res.ok) {
+      const data = (await res.json()) as {
+        user: User;
+      };
+      setUser(data.user);
+    } else {
+      const data = (await res.json()) as {
+        error: string;
+      };
+      throw new Error(data.error);
+    }
+  };
+  const register = async (
     name: string,
     surname: string,
     email: string,
     password: string
-  ) => {};
-  const logout = () => {};
+  ) => {
+    const res = await fetch("/api/auth/signup", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ name, surname, email, password }),
+    });
+
+    if (res.ok) {
+      const data = (await res.json()) as {
+        user: User;
+      };
+      setUser(data.user);
+    } else {
+      const data = (await res.json()) as {
+        error: string;
+      };
+      throw new Error(data.error);
+    }
+  };
+  const logout = async () => {
+    await fetch("/api/auth/logout", {
+      method: "POST",
+    });
+    setUser(null);
+  };
 
   const authenticate = async () => {
     const res = await fetch("/api/auth");
