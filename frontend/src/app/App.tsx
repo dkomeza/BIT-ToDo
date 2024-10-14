@@ -1,8 +1,9 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Home from "./pages/Dashboard";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import { lazy, Suspense } from "react";
 import { AuthProvider } from "@/context/AuthContext";
+
+import { lazy, Suspense } from "react";
 
 const Login = lazy(() => import("./pages/Login"));
 const Signup = lazy(() => import("./pages/Signup"));
@@ -21,7 +22,8 @@ function App() {
             <Route
               path="/login"
               element={
-                <Suspense>
+                // TODO: Add a loading spinner
+                <Suspense fallback={<h1>Loading...</h1>}>
                   <Login />
                 </Suspense>
               }
@@ -29,7 +31,7 @@ function App() {
             <Route
               path="/signup"
               element={
-                <Suspense>
+                <Suspense fallback={<h1>Loading...</h1>}>
                   <Signup />
                 </Suspense>
               }

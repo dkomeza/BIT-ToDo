@@ -46,7 +46,10 @@ function AccountDropdown() {
           <Button
             variant="destructive"
             className="w-full justify-start"
-            onClick={logout}
+            onClick={() => {
+              document.body.removeAttribute("style"); // remove the pointer-events: none; style
+              logout();
+            }}
           >
             Log out
           </Button>

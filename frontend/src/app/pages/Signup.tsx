@@ -23,6 +23,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useAuth } from "@/context/AuthContext";
+import { useEffect, useState } from "react";
+import { ReloadIcon } from "@radix-ui/react-icons";
 
 const formSchema = z.object({
   email: z.string().email(),
@@ -44,8 +46,16 @@ const formSchema = z.object({
 });
 
 export function Signup() {
-  const { register } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const { register, user } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user) {
+      navigate("/", { replace: true });
+    }
+  }, [user]);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -59,11 +69,10 @@ export function Signup() {
   async function onSubmit(data: z.infer<typeof formSchema>) {
     try {
       await register(data.name, data.surname, data.email, data.password);
-
-      // Redirect to the dashboard
-      navigate("/");
     } catch (error) {
       console.error(error);
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -146,7 +155,10 @@ export function Signup() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full">
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading && (
+                  <div className="border-2 rounded-full border-s-transparent mr-2 h-4 w-4 animate-spin" />
+                )}
                 Create an account
               </Button>
             </form>

@@ -21,7 +21,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 
 const formSchema = z.object({
@@ -30,12 +30,13 @@ const formSchema = z.object({
 });
 
 export function Login() {
+  const [loading, setLoading] = useState(false);
   const { login, user } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (user) {
-      navigate("/app", { replace: true });
+      navigate("/", { replace: true });
     }
   }, [user]);
 
@@ -48,14 +49,14 @@ export function Login() {
   });
 
   async function onSubmit(data: z.infer<typeof formSchema>) {
-    console.log(data);
+    setLoading(true);
 
     try {
       await login(data.email, data.password);
-
-      navigate("/", { replace: true });
     } catch (error) {
       console.error(error);
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -125,7 +126,10 @@ export function Login() {
                     )}
                   />
                 </div>
-                <Button type="submit" className="w-full">
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading && (
+                    <div className="border-2 rounded-full border-s-transparent mr-2 h-4 w-4 animate-spin" />
+                  )}
                   Login
                 </Button>
               </div>
