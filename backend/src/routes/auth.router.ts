@@ -10,7 +10,6 @@ import express from "express";
 const authRouter = express.Router();
 
 authRouter.post("/signup", async (req, res) => {
-  console.log(req.body);
   const parse = RegisterDataSchema.safeParse(req.body);
 
   if (!parse.success) {
@@ -35,8 +34,6 @@ authRouter.post("/signup", async (req, res) => {
 });
 
 authRouter.post("/login", async (req, res) => {
-  console.log(req.body);
-
   const parse = LoginDataSchema.safeParse(req.body);
 
   if (!parse.success) {
