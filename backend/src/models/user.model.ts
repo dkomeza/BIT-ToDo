@@ -1,11 +1,11 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
 import { AppDataSource } from "@/config/db.config";
 
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
   id: number;
-  @Column()
+  @PrimaryColumn()
   email: string;
   @Column()
   password: string;

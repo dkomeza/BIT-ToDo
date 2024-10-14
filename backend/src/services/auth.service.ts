@@ -1,19 +1,22 @@
 import jwt from "jsonwebtoken";
+import { z } from "zod";
 
 import { getUser, createUser } from "@/models/user.model";
 
-export type RegisterData = {
-  name: string;
-  surname: string;
+export const RegisterDataSchema = z.object({
+  name: z.string().min(1, { message: "Name is required" }),
+  surname: z.string().min(1, { message: "Surname is required" }),
+  email: z.string().email(),
+  password: z.string().min(1),
+});
 
-  email: string;
-  password: string;
-};
+export const LoginDataSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(1),
+});
 
-export type LoginData = {
-  email: string;
-  password: string;
-};
+export type RegisterData = z.infer<typeof RegisterDataSchema>;
+export type LoginData = z.infer<typeof LoginDataSchema>;
 
 export type Token = string;
 
@@ -37,9 +40,9 @@ export async function register(data: RegisterData): Promise<Token> {
 export async function login(data: LoginData): Promise<Token> {
   const user = await getUser({ email: data.email });
 
-  if (!user) throw new Error("Wrong password or email");
+  if (!user) throw new Error("Wrong email or password");
   if (!Bun.password.verifySync(data.password, user.password)) {
-    throw new Error("Wrong password or email");
+    throw new Error("Wrong email or password");
   }
 
   return jwt.sign({ id: user.id }, process.env.JWT_SECRET || "secret", {

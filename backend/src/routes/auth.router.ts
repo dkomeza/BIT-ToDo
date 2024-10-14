@@ -2,42 +2,42 @@ import { auth } from "@/middlewares/auth.middleware";
 import {
   register,
   login,
-  type RegisterData,
-  type LoginData,
+  RegisterDataSchema,
+  LoginDataSchema,
 } from "@/services/auth.service";
 import express from "express";
 
 const authRouter = express.Router();
 
 authRouter.post("/register", async (req, res) => {
-  const { data } = req.body as { data: RegisterData };
+  const parse = RegisterDataSchema.safeParse(req.body);
 
-  if (!data || !data.email || !data.name || !data.surname || !data.password) {
+  if (!parse.success) {
     res.status(400).send({ error: "Invalid data" });
     return;
   }
 
   try {
-    const token = await register(data);
+    const token = await register(parse.data);
 
-    res.send({ message: "User registered successfully", token });
+    res.send({ token });
   } catch (error: any) {
     res.status(400).send({ error: error.message });
   }
 });
 
 authRouter.post("/login", async (req, res) => {
-  const { data } = req.body as { data: LoginData };
+  const parse = LoginDataSchema.safeParse(req.body);
 
-  if (!data || !data.email || !data.password) {
+  if (!parse.success) {
     res.status(400).send({ error: "Invalid data" });
     return;
   }
 
   try {
-    const token = await login(data);
+    const token = await login(parse.data);
 
-    res.send({ message: "User logged in successfully", token });
+    res.send({ token });
   } catch (error: any) {
     res.status(400).send({ error: error.message });
   }

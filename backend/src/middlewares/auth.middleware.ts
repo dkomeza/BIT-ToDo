@@ -11,7 +11,7 @@ declare global {
 }
 
 export const auth = async (req: Request, res: Response, next: NextFunction) => {
-  const token = req.cookies["auth"] || req.headers.authorization?.split(" ")[1];
+  const token = req.cookies?.auth || req.headers.authorization?.split(" ")[1];
 
   if (!token) {
     res.status(401).send({ error: "Unauthorized" });
@@ -23,7 +23,14 @@ export const auth = async (req: Request, res: Response, next: NextFunction) => {
       id: string;
     };
 
-    req.user = await getUser({ id: Number(payload.id) });
+    const user = await getUser({ id: Number(payload.id) });
+
+    if (!user) {
+      res.status(401).send({ error: "Unauthorized" });
+      return;
+    }
+
+    req.user = { ...user, password: "" }; // Remove password from user object
     next();
   } catch (error: any) {
     res.status(401).send({ error: "Unauthorized" });
