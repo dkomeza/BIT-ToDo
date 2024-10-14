@@ -65,7 +65,7 @@ authRouter.post("/logout", (req, res) => {
 authRouter.get("/", auth, (req, res) => {
   const user = req.user;
 
-  res.send({ user });
+  res.send({ user: { ...user, password: "" } });
 });
 
 export default authRouter;

@@ -30,7 +30,7 @@ export const auth = async (req: Request, res: Response, next: NextFunction) => {
       return;
     }
 
-    req.user = { ...user, password: "" }; // Remove password from user object
+    req.user = user;
     next();
   } catch (error: any) {
     res.status(401).send({ error: "Unauthorized" });
