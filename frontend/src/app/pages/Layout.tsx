@@ -4,11 +4,15 @@ import { useEffect } from "react";
 import { Outlet } from "react-router-dom";
 
 function Layout() {
-  const { fetchLists } = useToDoStore();
+  const { fetchLists, error } = useToDoStore();
   useEffect(() => {
-    console.log("fetching lists");
     fetchLists();
   }, []);
+
+  useEffect(() => {
+    console.error(error);
+  }, [error]);
+
   return (
     <div className="flex flex-col sm:flex-row h-full px-4 py-6">
       <Sidebar />

@@ -36,11 +36,11 @@ export type UpdateListsPriorityData = z.infer<
 export async function create(data: CreateListData, user: User): Promise<List> {
   const slug = slugify(data.name);
   // Check if the name is already taken
-  const nameTaken = await selectList({ name: data.name, user });
+  const nameTaken = await selectList(user, { name: data.name });
   if (nameTaken) throw new Error("Name is already taken");
 
   // Check if the slug is already taken
-  const slugTaken = await selectList({ slug, user });
+  const slugTaken = await selectList(user, { slug });
   if (slugTaken)
     throw new Error("Slug is already taken (different name required)");
 
@@ -55,7 +55,7 @@ export async function get(
   user: User,
   { id, slug, name }: { id?: number; slug?: string; name?: string }
 ) {
-  return selectList({ id, slug, name, user });
+  return selectList(user, { id, slug, name });
 }
 
 export async function deleteList(user: User, id: number) {

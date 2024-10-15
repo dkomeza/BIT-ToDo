@@ -26,6 +26,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "./ui/textarea";
 import { useToDoStore } from "@/stores/ToDoStore";
+import { useState } from "react";
 
 const formSchema = z.object({
   name: z.string().min(1, {
@@ -35,6 +36,7 @@ const formSchema = z.object({
 });
 
 function NewList() {
+  const [open, setOpen] = useState(false);
   const { addList } = useToDoStore();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -45,12 +47,17 @@ function NewList() {
     },
   });
 
-  function onSubmit(data: z.infer<typeof formSchema>) {
-    addList(data);
+  async function onSubmit(data: z.infer<typeof formSchema>) {
+    await addList(data); // Wait for the list to be added before closing the drawer
+    setOpen(false);
   }
 
   return (
-    <Drawer repositionInputs={false}>
+    <Drawer
+      repositionInputs={false}
+      open={open}
+      onOpenChange={(isOpen) => setOpen(isOpen)}
+    >
       <DrawerTrigger asChild>
         <Button
           variant="secondary"

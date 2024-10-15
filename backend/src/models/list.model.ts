@@ -67,14 +67,16 @@ export async function createList(data: {
   return list;
 }
 
-export async function selectList(where: {
-  id?: number;
-  name?: string;
-  slug?: string;
-  user?: User;
-}): Promise<List | null> {
+export async function selectList(
+  user: User,
+  where: {
+    id?: number;
+    name?: string;
+    slug?: string;
+  }
+): Promise<List | null> {
   // Either id or user and name or slug is required
-  if (!where.user || (!where.id && (!where.name || !where.slug))) {
+  if (!user || (!where.id && !where.name && !where.slug)) {
     throw new Error("ID or user and name or slug is required");
   }
 
@@ -84,7 +86,7 @@ export async function selectList(where: {
     where: {
       ...where,
       user: {
-        id: where.user.id,
+        id: user.id, // Ugly but typeorm refuses to accept user object
       },
     },
   });

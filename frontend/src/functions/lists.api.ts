@@ -24,9 +24,25 @@ export async function saveList(list: List) {
     }),
   });
 
-  if (!response.ok) throw new Error("Failed to save list");
+  if (!response.ok) {
+    let data;
+
+    try {
+      // Attempt to parse the JSON response
+      data = (await response.json()) as { error?: string };
+    } catch (error) {
+      throw new Error("Failed to save list"); // Generic error message if the response isn't JSON
+    }
+
+    // Now handle any errors returned from the server
+    if (data?.error) {
+      throw new Error(data.error);
+    } else {
+      throw new Error("Failed to save list");
+    }
+  }
   const data = (await response.json()) as List;
-  if (!data.id) throw new Error("Failed to save list");
+  if (!data.id) throw new Error("Failed to save list"); // Generic error message if the response doesn't contain an id
   return data;
 }
 
