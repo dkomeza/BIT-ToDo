@@ -5,6 +5,7 @@ import {
   List,
   selectList,
   deleteList as deleteListModel,
+  selectUserLists,
 } from "@/models/list.model";
 import { User } from "@/models/user.model";
 
@@ -33,7 +34,7 @@ export async function create(data: CreateListData, user: User): Promise<List> {
 }
 
 export async function getUserLists(user: User): Promise<List[]> {
-  return user.lists;
+  return selectUserLists(user);
 }
 
 export async function get(

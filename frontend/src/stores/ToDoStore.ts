@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { fetchLists } from "@/functions/lists.api";
+import { fetchLists, saveList, slugify } from "@/functions/lists.api";
 
 export interface Task {
   id: number;
@@ -26,7 +26,13 @@ interface ToDoState {
 
   // Actions for lists
   fetchLists: () => Promise<void>;
-  addList: (list: List) => void;
+  addList: ({
+    name,
+    description,
+  }: {
+    name: string;
+    description?: string;
+  }) => Promise<void>;
   updateList: (id: number, updatedList: Partial<List>) => void;
   removeList: (id: number) => void;
 
@@ -56,10 +62,42 @@ export const useToDoStore = create<ToDoState>((set, get) => ({
   },
 
   // Add a new list
-  addList: (list: List) =>
+  addList: async ({
+    name,
+    description,
+  }: {
+    name: string;
+    description?: string;
+  }) => {
+    const tempId = Date.now(); // Generate a temporary id
+
+    const list: List = {
+      name,
+      description,
+      id: tempId,
+      slug: slugify(name),
+      priority: 0,
+      tasks: [],
+    };
+
     set((state) => ({
       lists: [...state.lists, list],
-    })),
+    }));
+
+    try {
+      const savedList = await saveList(list); // Save the list to the API
+
+      set((state) => {
+        const lists = state.lists.map((l) => (l.id === tempId ? savedList : l));
+        return { lists, error: null };
+      });
+    } catch (error: any) {
+      set((state) => {
+        const lists = state.lists.filter((l) => l.slug !== list.slug); // List slug is unique
+        return { lists, error: error.message };
+      });
+    }
+  },
 
   // Update an existing list
   updateList: (id: number, updatedList: Partial<List>) =>

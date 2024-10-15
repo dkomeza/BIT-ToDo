@@ -46,7 +46,7 @@ function NewList() {
   });
 
   function onSubmit(data: z.infer<typeof formSchema>) {
-    console.log(data);
+    addList(data);
   }
 
   return (
@@ -57,13 +57,12 @@ function NewList() {
           className="w-full flex gap-2 justify-between items-center p-0 pr-2 border-dashed border-2 border-neutral-600 text-secondary-foreground"
         >
           <div className="flex gap-2 items-center text-base">
-            <Button
-              variant="ghost"
-              size="icon"
+            <div
+              className="inline-flex items-center justify-center rounded-md focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring h-9 w-9"
               style={{ backgroundColor: "transparent" }}
             >
               <PlusIcon className="" />
-            </Button>
+            </div>
             Create new list
           </div>
           <div className="pointer-events-none w-6 h-6 bg-neutral-700 rounded-md text-xs flex items-center justify-center">

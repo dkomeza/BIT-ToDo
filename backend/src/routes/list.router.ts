@@ -11,7 +11,7 @@ const listRouter = express.Router();
 
 listRouter.get("/", auth, async (req, res) => {
   const lists = await getUserLists(req.user!);
-
+  console.log(lists);
   res.send(lists);
 });
 

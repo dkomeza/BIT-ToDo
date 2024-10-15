@@ -6,6 +6,7 @@ import { Outlet } from "react-router-dom";
 function Layout() {
   const { fetchLists } = useToDoStore();
   useEffect(() => {
+    console.log("fetching lists");
     fetchLists();
   }, []);
   return (

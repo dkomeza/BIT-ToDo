@@ -131,7 +131,7 @@ function HomeItem({ lists }: { lists: List[] }) {
       </div>
       <div className="bg-accent text-accent-foreground w-6 h-6 flex items-center justify-center text-xs rounded-sm">
         {lists.reduce((acc, list) => {
-          return acc + list.tasks.length;
+          return acc + (list.tasks ? list.tasks.length : 0);
         }, 0)}
       </div>
     </div>

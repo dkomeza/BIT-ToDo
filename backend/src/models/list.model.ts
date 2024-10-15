@@ -87,11 +87,17 @@ export async function selectList(where: {
   return list;
 }
 
-export async function getUserLists(user: User): Promise<List[]> {
+export async function selectUserLists(user: User): Promise<List[]> {
   const listRepository = AppDataSource.getRepository(List);
 
+  console.log(user);
+
   const lists = await listRepository.find({
-    where: { user },
+    where: {
+      user: {
+        id: user.id,
+      },
+    },
   });
 
   return lists;
