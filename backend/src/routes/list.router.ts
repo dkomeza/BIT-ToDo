@@ -1,9 +1,11 @@
 import { auth } from "@/middlewares/auth.middleware";
+import { updateList } from "@/models/list.model";
 import {
   getUserLists,
   get,
   create,
   CreateListDataSchema,
+  UpdateListsPriorityDataSchema,
 } from "@/services/list.service";
 import express from "express";
 
@@ -11,7 +13,6 @@ const listRouter = express.Router();
 
 listRouter.get("/", auth, async (req, res) => {
   const lists = await getUserLists(req.user!);
-  console.log(lists);
   res.send(lists);
 });
 
@@ -62,6 +63,29 @@ listRouter.get("/:slug", auth, async (req, res) => {
   }
 
   res.send(list);
+});
+
+listRouter.put("/priority", auth, async (req, res) => {
+  const parse = UpdateListsPriorityDataSchema.safeParse(req.body);
+
+  if (!parse.success) {
+    res.status(400).send({ error: "Invalid data" });
+    return;
+  }
+
+  console.log(parse.data);
+
+  try {
+    const lists = await Promise.all(
+      parse.data.map((data) =>
+        updateList(req.user!, { id: data.id }, { priority: data.priority })
+      )
+    );
+
+    res.send(lists);
+  } catch (error: any) {
+    res.status(400).send({ error: error.message });
+  }
 });
 
 export default listRouter;

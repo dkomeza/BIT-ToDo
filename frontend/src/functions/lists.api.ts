@@ -24,10 +24,21 @@ export async function saveList(list: List) {
     }),
   });
 
-  // if (!response.ok) throw new Error("Failed to save list");
+  if (!response.ok) throw new Error("Failed to save list");
   const data = (await response.json()) as List;
-  console.log(data);
-
   if (!data.id) throw new Error("Failed to save list");
   return data;
+}
+
+export async function updatePriority(data: { id: number; priority: number }[]) {
+  const response = await fetch(`${url}/priority`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) throw new Error("Failed to update list priority");
+  return response.json();
 }

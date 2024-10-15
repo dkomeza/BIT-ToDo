@@ -12,6 +12,7 @@ import {
 import {
   closestCenter,
   DndContext,
+  DragEndEvent,
   PointerSensor,
   useSensor,
   useSensors,
@@ -19,25 +20,23 @@ import {
 
 import { useNavigate } from "react-router-dom";
 
-import { DragHandleDots2Icon, PlusIcon } from "@radix-ui/react-icons";
+import { DragHandleDots2Icon } from "@radix-ui/react-icons";
 import { Button } from "@/components/ui/button";
 import { List, useToDoStore } from "@/stores/ToDoStore";
 import NewList from "../NewList";
 
 function Lists() {
-  const { lists } = useToDoStore();
+  const { lists, changeListPriority } = useToDoStore();
   const sensors = useSensors(useSensor(PointerSensor));
 
-  function handleDragEnd(event: any) {
-    // TODO: Fix any type and implement this function
+  function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
 
-    if (active.id !== over.id) {
-      // setLists((items) => {
-      //   const oldIndex = items.indexOf(active.id);
-      //   const newIndex = items.indexOf(over.id);
-      //   return arrayMove(items, oldIndex, newIndex);
-      // });
+    if (active.id !== over?.id) {
+      const oldIndex = lists.findIndex((list) => list.id === active.id);
+      const newIndex = lists.findIndex((list) => list.id === over?.id);
+
+      changeListPriority(oldIndex, newIndex);
     }
   }
 

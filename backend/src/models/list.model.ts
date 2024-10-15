@@ -74,14 +74,19 @@ export async function selectList(where: {
   user?: User;
 }): Promise<List | null> {
   // Either id or user and name or slug is required
-  if (!where.id && (!where.user || (!where.name && !where.slug))) {
+  if (!where.user || (!where.id && (!where.name || !where.slug))) {
     throw new Error("ID or user and name or slug is required");
   }
 
   const listRepository = AppDataSource.getRepository(List);
 
   const list = await listRepository.findOne({
-    where,
+    where: {
+      ...where,
+      user: {
+        id: where.user.id,
+      },
+    },
   });
 
   return list;
@@ -89,8 +94,6 @@ export async function selectList(where: {
 
 export async function selectUserLists(user: User): Promise<List[]> {
   const listRepository = AppDataSource.getRepository(List);
-
-  console.log(user);
 
   const lists = await listRepository.find({
     where: {
@@ -104,12 +107,20 @@ export async function selectUserLists(user: User): Promise<List[]> {
 }
 
 export async function updateList(
+  user: User,
   where: { id: number },
   data: Partial<List>
 ): Promise<List | null> {
   const listRepository = AppDataSource.getRepository(List);
 
-  const list = await listRepository.findOne({ where });
+  const list = await listRepository.findOne({
+    where: {
+      ...where,
+      user: {
+        id: user.id, // Ensure the user owns the list
+      },
+    },
+  });
   if (!list) return null;
 
   Object.assign(list, data);

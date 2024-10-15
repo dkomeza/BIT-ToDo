@@ -17,7 +17,21 @@ export const CreateListDataSchema = z.object({
   description: z.string().optional(),
 });
 
+export const UpdateListPriorityDataSchema = z.object({
+  id: z.number(),
+  priority: z.number(),
+});
+export const UpdateListsPriorityDataSchema = z.array(
+  UpdateListPriorityDataSchema
+);
+
 export type CreateListData = z.infer<typeof CreateListDataSchema>;
+export type UpdateListPriorityData = z.infer<
+  typeof UpdateListPriorityDataSchema
+>;
+export type UpdateListsPriorityData = z.infer<
+  typeof UpdateListsPriorityDataSchema
+>;
 
 export async function create(data: CreateListData, user: User): Promise<List> {
   const slug = slugify(data.name);
