@@ -48,7 +48,6 @@ function Sidebar() {
         <div className="flex flex-col gap-4 mt-8 pl-2">
           <h3 className="text-2xl font-bold">Lists</h3>
           <Lists />
-          
         </div>
       </SheetContent>
     </Sheet>
