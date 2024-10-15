@@ -9,14 +9,12 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import {
   Form,
-  FormControl,
   FormField,
   FormItem,
   FormLabel,
@@ -24,10 +22,11 @@ import {
 } from "@/components/ui/form";
 import { useAuth } from "@/context/AuthContext";
 import { useEffect, useState } from "react";
-import { ReloadIcon } from "@radix-ui/react-icons";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
 
 const formSchema = z.object({
-  email: z.string().email(),
+  email: z.string().email({ message: "Invalid email address" }),
   password: z
     .string()
     .min(8, { message: "Password must be at least 8 characters" })
@@ -41,12 +40,15 @@ const formSchema = z.object({
           "Password must contain at least one uppercase letter, one lowercase letter, and one number.",
       }
     ),
-  name: z.string().min(1),
-  surname: z.string().min(1),
+  name: z.string().min(1, { message: "First name is required" }),
+  surname: z.string().min(1, { message: "Last name is required" }),
 });
 
 export function Signup() {
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [errorTimeout, setErrorTimeout] = useState<NodeJS.Timeout | null>(null);
+
   const { register, user } = useAuth();
   const navigate = useNavigate();
 
@@ -69,8 +71,16 @@ export function Signup() {
   async function onSubmit(data: z.infer<typeof formSchema>) {
     try {
       await register(data.name, data.surname, data.email, data.password);
-    } catch (error) {
-      console.error(error);
+    } catch (error: any) {
+      setError(error.message);
+      if (errorTimeout) {
+        clearTimeout(errorTimeout);
+      }
+      setErrorTimeout(
+        setTimeout(() => {
+          setError(null);
+        }, 5000)
+      );
     } finally {
       setLoading(false);
     }
@@ -155,6 +165,13 @@ export function Signup() {
                   </FormItem>
                 )}
               />
+              {error && (
+                <Alert variant="destructive">
+                  <ExclamationTriangleIcon className="h-4 w-4" />
+                  <AlertTitle>Error</AlertTitle>
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading && (
                   <div className="border-2 rounded-full border-s-transparent mr-2 h-4 w-4 animate-spin" />

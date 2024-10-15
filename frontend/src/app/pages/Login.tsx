@@ -23,16 +23,20 @@ import {
 } from "@/components/ui/form";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
 
 const formSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(1),
+  email: z.string().email({ message: "Invalid email address" }),
+  password: z.string().min(1, { message: "Password is required" }),
 });
 
 export function Login() {
   const [loading, setLoading] = useState(false);
   const { login, user } = useAuth();
   const navigate = useNavigate();
+  const [error, setError] = useState<string | null>(null);
+  const [errorTimeout, setErrorTimeout] = useState<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -53,8 +57,16 @@ export function Login() {
 
     try {
       await login(data.email, data.password);
-    } catch (error) {
-      console.error(error);
+    } catch (error: any) {
+      setError(error.message);
+      if (errorTimeout) {
+        clearTimeout(errorTimeout);
+      }
+      setErrorTimeout(
+        setTimeout(() => {
+          setError(null);
+        }, 5000)
+      );
     } finally {
       setLoading(false);
     }
@@ -126,6 +138,13 @@ export function Login() {
                     )}
                   />
                 </div>
+                {error && (
+                  <Alert variant="destructive">
+                    <ExclamationTriangleIcon className="h-4 w-4" />
+                    <AlertTitle>Error</AlertTitle>
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
+                )}
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading && (
                     <div className="border-2 rounded-full border-s-transparent mr-2 h-4 w-4 animate-spin" />
