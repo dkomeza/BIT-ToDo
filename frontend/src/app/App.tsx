@@ -4,6 +4,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import { AuthProvider } from "@/context/AuthContext";
 
 import { lazy, Suspense } from "react";
+import Layout from "./pages/layout";
 
 const Login = lazy(() => import("./pages/Login"));
 const Signup = lazy(() => import("./pages/Signup"));
@@ -15,7 +16,9 @@ function App() {
         <BrowserRouter>
           <Routes>
             <Route element={<ProtectedRoute />}>
-              <Route path="/" element={<Home />} />
+              <Route element={<Layout />}>
+                <Route path="/" element={<Home />} />
+              </Route>
             </Route>
 
             {/* Authentication routes */}
