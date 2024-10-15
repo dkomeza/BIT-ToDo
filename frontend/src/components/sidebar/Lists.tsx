@@ -17,18 +17,19 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { DragHandleDots2Icon } from "@radix-ui/react-icons";
+import { DragHandleDots2Icon, PlusIcon } from "@radix-ui/react-icons";
 import { Button } from "@/components/ui/button";
-import { List, useToDoStore } from "@/stores/ListStore";
+import { List, useToDoStore } from "@/stores/ToDoStore";
+import NewList from "../NewList";
 
 function Lists() {
   const { lists } = useToDoStore();
   const sensors = useSensors(useSensor(PointerSensor));
 
   function handleDragEnd(event: any) {
+    // TODO: Fix any type and implement this function
     const { active, over } = event;
 
     if (active.id !== over.id) {
@@ -42,19 +43,20 @@ function Lists() {
 
   return (
     <div className="ml-2 flex flex-col">
+      <HomeItem lists={lists} />
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
         onDragEnd={handleDragEnd}
         modifiers={[restrictToWindowEdges, restrictToVerticalAxis]}
       >
-        <HomeItem lists={lists} />
         <SortableContext items={lists} strategy={verticalListSortingStrategy}>
           {lists.map((list) => (
             <SortableItem key={list.slug} list={list} />
           ))}
         </SortableContext>
       </DndContext>
+      <NewList />
     </div>
   );
 }

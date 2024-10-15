@@ -1,5 +1,10 @@
 import { auth } from "@/middlewares/auth.middleware";
-import { getUserLists, get } from "@/services/list.service";
+import {
+  getUserLists,
+  get,
+  create,
+  CreateListDataSchema,
+} from "@/services/list.service";
 import express from "express";
 
 const listRouter = express.Router();
@@ -8,6 +13,23 @@ listRouter.get("/", auth, async (req, res) => {
   const lists = await getUserLists(req.user!);
 
   res.send(lists);
+});
+
+listRouter.post("/", auth, async (req, res) => {
+  const parse = CreateListDataSchema.safeParse(req.body);
+
+  if (!parse.success) {
+    res.status(400).send({ error: "Invalid data" });
+    return;
+  }
+
+  try {
+    const list = await create(parse.data, req.user!);
+
+    res.send(list);
+  } catch (error: any) {
+    res.status(400).send({ error: error.message });
+  }
 });
 
 listRouter.get("/:id", auth, async (req, res) => {

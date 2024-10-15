@@ -44,6 +44,7 @@ export class List {
   @BeforeUpdate()
   generateSlug() {
     this.slug = slugify(this.name);
+    this.updatedAt = new Date();
   }
 }
 
