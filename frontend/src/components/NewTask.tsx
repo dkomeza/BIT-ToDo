@@ -37,6 +37,14 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
+import { useToDoStore } from "@/stores/ToDoStore";
 
 const formSchema = z.object({
   title: z.string().min(1, {
@@ -48,13 +56,14 @@ const formSchema = z.object({
 });
 
 function NewTask() {
+  const { lists } = useToDoStore();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: "",
       description: "",
       date: new Date(),
-      list: "",
+      list: "Home",
     },
   });
 
@@ -97,85 +106,110 @@ function NewTask() {
                   </FormItem>
                 )}
               />
-
-              <FormField
-                control={form.control}
-                name="date"
-                render={({ field }) => (
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button
-                        variant={"outline"}
-                        className="w-full justify-start mt-4"
+              <div className="flex mt-4 gap-2">
+                <FormField
+                  control={form.control}
+                  name="date"
+                  render={({ field }) => (
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button variant={"outline"} className="justify-start">
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {dayjs(field.value).format("DD MMMM YYYY")}
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="flex w-auto flex-col p-2 py-4 rounded-md [&>button]:hidden">
+                        <DialogHeader>
+                          <DialogTitle>Select a date</DialogTitle>
+                        </DialogHeader>
+                        <div className="flex flex-col">
+                          <Button
+                            className="flex justify-between"
+                            variant="ghost"
+                            onClick={() => {
+                              form.setValue("date", new Date());
+                            }}
+                          >
+                            Today
+                            <p className="text-xs text-muted-foreground">
+                              {dayjs().format("ddd")}
+                            </p>
+                          </Button>
+                          <Button
+                            className="flex justify-between"
+                            variant="ghost"
+                            onClick={() => {
+                              form.setValue(
+                                "date",
+                                dayjs().add(1, "day").toDate()
+                              );
+                            }}
+                          >
+                            Tomorrow
+                            <p className="text-xs text-muted-foreground">
+                              {dayjs().add(1, "day").format("ddd")}
+                            </p>
+                          </Button>
+                          <Button
+                            className="flex justify-between"
+                            variant="ghost"
+                            onClick={() => {
+                              form.setValue(
+                                "date",
+                                dayjs().add(7, "day").toDate()
+                              );
+                            }}
+                          >
+                            Next Week
+                            <p className="text-xs text-muted-foreground">
+                              {dayjs().add(7, "day").format("ddd DD MMM")}
+                            </p>
+                          </Button>
+                        </div>
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={(date) => {
+                            form.setValue("date", date);
+                          }}
+                        />
+                        <DialogFooter>
+                          <DialogClose asChild>
+                            <Button variant="default">Save</Button>
+                          </DialogClose>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="list"
+                  render={({ field }) => (
+                    <FormItem className="w-full">
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
                       >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {dayjs(field.value).format("dddd, DD MMMM YYYY")}
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="flex w-auto flex-col p-2 py-4 rounded-md [&>button]:hidden">
-                      <DialogHeader>
-                        <DialogTitle>Select a date</DialogTitle>
-                      </DialogHeader>
-                      <div className="flex flex-col">
-                        <Button
-                          className="flex justify-between"
-                          variant="ghost"
-                          onClick={() => {
-                            form.setValue("date", new Date());
-                          }}
-                        >
-                          Today
-                          <p className="text-xs text-muted-foreground">
-                            {dayjs().format("ddd")}
-                          </p>
-                        </Button>
-                        <Button
-                          className="flex justify-between"
-                          variant="ghost"
-                          onClick={() => {
-                            form.setValue(
-                              "date",
-                              dayjs().add(1, "day").toDate()
-                            );
-                          }}
-                        >
-                          Tomorrow
-                          <p className="text-xs text-muted-foreground">
-                            {dayjs().add(1, "day").format("ddd")}
-                          </p>
-                        </Button>
-                        <Button
-                          className="flex justify-between"
-                          variant="ghost"
-                          onClick={() => {
-                            form.setValue(
-                              "date",
-                              dayjs().add(7, "day").toDate()
-                            );
-                          }}
-                        >
-                          Next Week
-                          <p className="text-xs text-muted-foreground">
-                            {dayjs().add(7, "day").format("ddd DD MMM")}
-                          </p>
-                        </Button>
-                      </div>
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={(date) => {
-                          form.setValue("date", date);
-                        }}
-                      />
-                      <DialogFooter>
-                        <DialogClose asChild>
-                          <Button variant="default">Save</Button>
-                        </DialogClose>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
-                )}
-              />
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a verified email to display" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Home">Home</SelectItem>
+                          {lists.map((list) => (
+                            <SelectItem key={list.id} value={list.name}>
+                              {list.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
               <FormField
                 control={form.control}
                 name="description"
