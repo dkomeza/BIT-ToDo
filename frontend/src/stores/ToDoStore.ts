@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import {
   fetchLists,
+  removeList,
   saveList,
   slugify,
   updatePriority,
@@ -43,7 +44,7 @@ interface ToDoState {
   }) => Promise<void>;
   changeListPriority: (oldIndex: number, newIndex: number) => Promise<void>;
   updateList: (id: number, updatedList: Partial<List>) => void;
-  removeList: (id: number) => void;
+  removeList: (id: number) => Promise<void>;
 
   // Actions for tasks
   addTask: (task: Task) => void;
@@ -163,11 +164,25 @@ export const useToDoStore = create<ToDoState>((set, get) => ({
     })),
 
   // Remove a list by id
-  removeList: (id: number) =>
+  removeList: async (id: number) => {
+    const list = get().lists.find((list) => list.id === id);
+    const tasks = get().tasks.filter((task) => task.listId === id);
+
     set((state) => ({
       lists: state.lists.filter((list) => list.id !== id),
       tasks: state.tasks.filter((task) => task.listId !== id), // Remove tasks associated with the list
-    })),
+    }));
+
+    try {
+      await removeList(id);
+    } catch (error: any) {
+      set((state) => ({
+        lists: sortLists([...state.lists, list] as List[]),
+        tasks: [...state.tasks, ...tasks] as Task[],
+        error: error.message,
+      }));
+    }
+  },
 
   // Add a new task
   addTask: (task: Task) =>
@@ -217,4 +232,14 @@ function parseLists(lists: List[]) {
           : -1
         : b.priority - a.priority
     );
+}
+
+function sortLists(lists: List[]) {
+  return lists.sort((a, b) =>
+    a.priority === b.priority
+      ? a.updatedAt > b.updatedAt
+        ? 1
+        : -1
+      : b.priority - a.priority
+  );
 }

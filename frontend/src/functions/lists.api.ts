@@ -58,3 +58,12 @@ export async function updatePriority(data: { id: number; priority: number }[]) {
   if (!response.ok) throw new Error("Failed to update list priority");
   return response.json();
 }
+
+export async function removeList(id: number) {
+  const response = await fetch(`${url}/${id}`, {
+    method: "DELETE",
+  });
+
+  if (!response.ok) throw new Error("Failed to remove list");
+  return response.json();
+}

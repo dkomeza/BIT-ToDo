@@ -109,6 +109,7 @@ function SortableItem({ list }: { list: List }) {
       animateLeft(left, 0, 100);
     } else if (left < -150) {
       removeList(list.id);
+      setLeft(0);
     } else if (left < -75) {
       animateLeft(left, -100, 100);
     } else {

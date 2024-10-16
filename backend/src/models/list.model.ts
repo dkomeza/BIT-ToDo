@@ -102,6 +102,7 @@ export async function selectUserLists(user: User): Promise<List[]> {
       user: {
         id: user.id,
       },
+      isArchived: false,
     },
   });
 

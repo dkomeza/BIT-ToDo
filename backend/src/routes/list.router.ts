@@ -49,7 +49,25 @@ listRouter.get("/:id", auth, async (req, res) => {
   res.send(list);
 });
 
-listRouter.get("/:slug", auth, async (req, res) => {
+listRouter.delete("/:id", auth, async (req, res) => {
+  if (!req.params.id) {
+    res.status(400).send({ error: "ID is required" });
+    return;
+  }
+
+  try {
+    await updateList(
+      req.user!,
+      { id: Number(req.params.id) },
+      { isArchived: true }
+    );
+    res.send({ success: true });
+  } catch (error: any) {
+    res.status(400).send({ error: error.message });
+  }
+});
+
+listRouter.get("/slug/:slug", auth, async (req, res) => {
   if (!req.params.slug) {
     res.status(400).send({ error: "Slug is required" });
     return;
