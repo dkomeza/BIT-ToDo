@@ -29,6 +29,7 @@ import { List, useToDoStore } from "@/stores/ToDoStore";
 import NewList from "../NewList";
 import { useRef, useState } from "react";
 import useAnimate from "@/hooks/useAnimate";
+import EditList from "../EditList";
 
 function Lists() {
   const { lists, changeListPriority } = useToDoStore();
@@ -160,15 +161,12 @@ function SortableItem({ list }: { list: List }) {
           width: `${-left}px`,
         }}
       >
-        <div className="h-full w-full flex bg-yellow-500 rounded-sm relative">
-          <div
-            className="w-[50px] h-full flex items-center justify-center"
-            onClick={() => {
-              console.log("more");
-            }}
-          >
-            <DotsHorizontalIcon />
-          </div>
+        <EditList
+          list={list}
+          hideButtons={() => {
+            animateLeft(left, 0, 100);
+          }}
+        >
           <div
             className={`${
               left < -150 ? "w-full" : "w-1/2"
@@ -183,7 +181,7 @@ function SortableItem({ list }: { list: List }) {
               <TrashIcon />
             </div>
           </div>
-        </div>
+        </EditList>
       </div>
     </div>
   );

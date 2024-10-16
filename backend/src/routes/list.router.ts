@@ -6,6 +6,8 @@ import {
   create,
   CreateListDataSchema,
   UpdateListsPriorityDataSchema,
+  deleteList,
+  UpdateListDataSchema,
 } from "@/services/list.service";
 import express from "express";
 
@@ -56,12 +58,33 @@ listRouter.delete("/:id", auth, async (req, res) => {
   }
 
   try {
-    await updateList(
+    await deleteList(req.user!, Number(req.params.id));
+    res.send({ success: true });
+  } catch (error: any) {
+    res.status(400).send({ error: error.message });
+  }
+});
+
+listRouter.put("/:id", auth, async (req, res) => {
+  if (!req.params.id) {
+    res.status(400).send({ error: "ID is required" });
+    return;
+  }
+
+  const parse = UpdateListDataSchema.safeParse(req.body);
+
+  if (!parse.success) {
+    res.status(400).send({ error: "Invalid data" });
+    return;
+  }
+
+  try {
+    const list = await updateList(
       req.user!,
       { id: Number(req.params.id) },
-      { isArchived: true }
+      parse.data
     );
-    res.send({ success: true });
+    res.send(list);
   } catch (error: any) {
     res.status(400).send({ error: error.message });
   }

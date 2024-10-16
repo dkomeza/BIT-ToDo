@@ -67,3 +67,16 @@ export async function removeList(id: number) {
   if (!response.ok) throw new Error("Failed to remove list");
   return response.json();
 }
+
+export async function updateList(id: number, updatedList: Partial<List>) {
+  const response = await fetch(`${url}/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(updatedList),
+  });
+
+  if (!response.ok) throw new Error("Failed to update list");
+  return response.json();
+}

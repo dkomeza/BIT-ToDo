@@ -4,6 +4,7 @@ import {
   removeList,
   saveList,
   slugify,
+  updateList,
   updatePriority,
 } from "@/functions/lists.api";
 
@@ -43,7 +44,7 @@ interface ToDoState {
     description?: string;
   }) => Promise<void>;
   changeListPriority: (oldIndex: number, newIndex: number) => Promise<void>;
-  updateList: (id: number, updatedList: Partial<List>) => void;
+  updateList: (id: number, updatedList: Partial<List>) => Promise<void>;
   removeList: (id: number) => Promise<void>;
 
   // Actions for tasks
@@ -156,12 +157,45 @@ export const useToDoStore = create<ToDoState>((set, get) => ({
   },
 
   // Update an existing list
-  updateList: (id: number, updatedList: Partial<List>) =>
+  updateList: async (id: number, updatedList: Partial<List>) => {
+    const list = get().lists.find((list) => list.id === id);
+    const oldList = { ...list };
+
+    // Check if the updated data is different from the existing data
+    if (!list) return;
+    if (
+      list.name === updatedList.name &&
+      list.description === updatedList.description
+    )
+      return;
+
+    if (!updatedList.name) {
+      updatedList.name = list.name; // Prevent empty name
+    }
+
+    list.name = updatedList.name;
+    list.description = updatedList.description;
+
     set((state) => ({
       lists: state.lists.map((list) =>
         list.id === id ? { ...list, ...updatedList } : list
       ),
-    })),
+    }));
+
+    try {
+      await updateList(id, updatedList);
+    } catch (error: any) {
+      set((state) => {
+        const lists = state.lists.map((l) =>
+          l.id === id ? { ...l, ...oldList } : l
+        );
+        return {
+          lists: sortLists(lists),
+          error: error.message,
+        };
+      });
+    }
+  },
 
   // Remove a list by id
   removeList: async (id: number) => {
