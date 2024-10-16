@@ -35,6 +35,43 @@ listRouter.post("/", auth, async (req, res) => {
   }
 });
 
+listRouter.put("/priority", auth, async (req, res) => {
+  const parse = UpdateListsPriorityDataSchema.safeParse(req.body);
+
+  if (!parse.success) {
+    res.status(400).send({ error: "Invalid data" });
+    return;
+  }
+
+  try {
+    const lists = await Promise.all(
+      parse.data.map((data) =>
+        updateList(req.user!, { id: data.id }, { priority: data.priority })
+      )
+    );
+
+    res.send(lists);
+  } catch (error: any) {
+    res.status(400).send({ error: error.message });
+  }
+});
+
+listRouter.get("/slug/:slug", auth, async (req, res) => {
+  if (!req.params.slug) {
+    res.status(400).send({ error: "Slug is required" });
+    return;
+  }
+
+  const list = await get(req.user!, { slug: req.params.slug });
+
+  if (!list) {
+    res.status(404).send({ error: "List not found" });
+    return;
+  }
+
+  res.send(list);
+});
+
 listRouter.get("/:id", auth, async (req, res) => {
   if (!req.params.id) {
     res.status(400).send({ error: "ID is required" });
@@ -49,20 +86,6 @@ listRouter.get("/:id", auth, async (req, res) => {
   }
 
   res.send(list);
-});
-
-listRouter.delete("/:id", auth, async (req, res) => {
-  if (!req.params.id) {
-    res.status(400).send({ error: "ID is required" });
-    return;
-  }
-
-  try {
-    await deleteList(req.user!, Number(req.params.id));
-    res.send({ success: true });
-  } catch (error: any) {
-    res.status(400).send({ error: error.message });
-  }
 });
 
 listRouter.put("/:id", auth, async (req, res) => {
@@ -90,40 +113,15 @@ listRouter.put("/:id", auth, async (req, res) => {
   }
 });
 
-listRouter.get("/slug/:slug", auth, async (req, res) => {
-  if (!req.params.slug) {
-    res.status(400).send({ error: "Slug is required" });
+listRouter.delete("/:id", auth, async (req, res) => {
+  if (!req.params.id) {
+    res.status(400).send({ error: "ID is required" });
     return;
   }
-
-  const list = await get(req.user!, { slug: req.params.slug });
-
-  if (!list) {
-    res.status(404).send({ error: "List not found" });
-    return;
-  }
-
-  res.send(list);
-});
-
-listRouter.put("/priority", auth, async (req, res) => {
-  const parse = UpdateListsPriorityDataSchema.safeParse(req.body);
-
-  if (!parse.success) {
-    res.status(400).send({ error: "Invalid data" });
-    return;
-  }
-
-  console.log(parse.data);
 
   try {
-    const lists = await Promise.all(
-      parse.data.map((data) =>
-        updateList(req.user!, { id: data.id }, { priority: data.priority })
-      )
-    );
-
-    res.send(lists);
+    await deleteList(req.user!, Number(req.params.id));
+    res.send({ success: true });
   } catch (error: any) {
     res.status(400).send({ error: error.message });
   }
