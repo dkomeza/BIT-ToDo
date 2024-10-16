@@ -30,6 +30,15 @@ import NewList from "../NewList";
 import { useRef, useState } from "react";
 import useAnimate from "@/hooks/useAnimate";
 import EditList from "../EditList";
+import {
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogClose,
+} from "@/components/ui/dialog";
 
 function Lists() {
   const { lists, changeListPriority } = useToDoStore();
@@ -68,6 +77,7 @@ function Lists() {
 
 function SortableItem({ list }: { list: List }) {
   const { removeList } = useToDoStore();
+  const [open, setOpen] = useState(false);
 
   const router = useNavigate();
   const [startX, setStartX] = useState(0);
@@ -109,8 +119,8 @@ function SortableItem({ list }: { list: List }) {
     if (left >= 0) {
       animateLeft(left, 0, 100);
     } else if (left < -150) {
-      removeList(list.id);
-      setLeft(0);
+      setOpen(true);
+      animateLeft(left, 0, 200);
     } else if (left < -75) {
       animateLeft(left, -100, 100);
     } else {
@@ -172,14 +182,53 @@ function SortableItem({ list }: { list: List }) {
               left < -150 ? "w-full" : "w-1/2"
             } bg-red-500 rounded-sm absolute h-full right-0 transition-all`}
           >
-            <div
-              className="w-[50px] h-full flex items-center justify-center"
-              onClick={() => {
-                removeList(list.id);
+            <Dialog
+              open={open}
+              onOpenChange={(isOpen) => {
+                setOpen(isOpen);
               }}
             >
-              <TrashIcon />
-            </div>
+              <DialogTrigger asChild>
+                <div
+                  className="w-[50px] h-full flex items-center justify-center"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    // removeList(list.id);
+                  }}
+                >
+                  <TrashIcon />
+                </div>
+              </DialogTrigger>
+              <DialogContent className="flex w-auto flex-col rounded-md [&>button]:hidden p-4">
+                <DialogHeader>
+                  <DialogTitle>Are you sure?</DialogTitle>
+                  <DialogDescription>
+                    This action cannot be undone.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="flex flex-row justify-between gap-10 mt-2">
+                  <DialogClose asChild>
+                    <Button
+                      variant="outline"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        animateLeft(left, 0, 100);
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                  </DialogClose>
+                  <Button
+                    variant="destructive"
+                    onClick={() => {
+                      removeList(list.id);
+                    }}
+                  >
+                    Remove
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
         </EditList>
       </div>
