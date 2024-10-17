@@ -8,6 +8,7 @@ import {
 } from "typeorm";
 import { AppDataSource } from "@/config/db.config";
 import { List } from "./list.model";
+import { Task } from "./task.model";
 
 @Entity()
 export class User {
@@ -24,6 +25,9 @@ export class User {
 
   @OneToMany(() => List, (list) => list.user) // Use forward reference
   lists!: Relation<List>[];
+
+  @OneToMany(() => Task, (task) => task.user) // Use forward reference
+  tasks!: Relation<Task>[];
 
   @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   createdAt: Date;

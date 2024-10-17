@@ -75,7 +75,6 @@ function ExpandableList({ list }: { list: List }) {
           </Button>
         </CollapsibleTrigger>
         <div className="flex items-center gap-2">
-          <CalendarIcon />
           <h3 className="text-xl font-semibold">{list.name}</h3>
         </div>
         <div className="bg-accent text-accent-foreground w-6 h-6 flex items-center justify-center text-xs rounded-sm">

@@ -6,10 +6,12 @@ import {
   type Relation,
   BeforeInsert,
   BeforeUpdate,
+  OneToMany,
 } from "typeorm";
 import { AppDataSource } from "@/config/db.config";
 import { User } from "./user.model";
 import { slugify } from "@/services/list.service";
+import { Task } from "./task.model";
 
 @Entity()
 export class List {
@@ -27,6 +29,9 @@ export class List {
 
   @ManyToOne(() => User, (user) => user.lists, { onDelete: "CASCADE" }) // Use forward reference
   user!: Relation<User>;
+
+  @OneToMany(() => Task, (task) => task.list) // Use forward reference
+  tasks!: Relation<Task>[];
 
   @Column({ type: "int", default: 0 })
   priority!: number; // Control order of the lists
