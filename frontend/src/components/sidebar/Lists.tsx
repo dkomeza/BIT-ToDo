@@ -7,6 +7,7 @@ import {
 import {
   restrictToWindowEdges,
   restrictToVerticalAxis,
+  restrictToParentElement,
 } from "@dnd-kit/modifiers";
 import {
   closestCenter,
@@ -19,11 +20,7 @@ import {
 
 import { useNavigate } from "react-router-dom";
 
-import {
-  DotsHorizontalIcon,
-  DragHandleDots2Icon,
-  TrashIcon,
-} from "@radix-ui/react-icons";
+import { DragHandleDots2Icon, TrashIcon } from "@radix-ui/react-icons";
 import { Button } from "@/components/ui/button";
 import { List, useToDoStore } from "@/stores/ToDoStore";
 import NewList from "../NewList";
@@ -80,9 +77,12 @@ function SortableItem({ list }: { list: List }) {
   const [open, setOpen] = useState(false);
 
   const router = useNavigate();
+
   const [startX, setStartX] = useState(0);
   const [startWidth, setStartWidth] = useState(0);
   const [left, animateLeft, setLeft] = useAnimate(0);
+  const [isDragging, setIsDragging] = useState(false);
+
   const elementRef = useRef<HTMLDivElement>(null);
 
   const { attributes, listeners, setNodeRef, transform, transition } =
@@ -94,11 +94,22 @@ function SortableItem({ list }: { list: List }) {
   };
 
   const onDragStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    const target = e.target as HTMLElement;
+
+    if (target.ariaRoleDescription === "sortable") {
+      return;
+    }
+
     setStartX(e.touches[0].clientX - left);
+    setIsDragging(true);
     setStartWidth(elementRef.current?.offsetWidth || 0);
   };
 
   const onDrag = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (!isDragging) {
+      return;
+    }
+
     const x = e.touches[0].clientX;
 
     const diff = x - startX;
@@ -126,11 +137,14 @@ function SortableItem({ list }: { list: List }) {
     } else {
       animateLeft(left, 0, 100);
     }
+
+    setIsDragging(false);
   };
 
   return (
     <div
-      className="relative overflow-hidden flex justify-end rounded-sm items-stretch"
+      // className="relative overflow-hidden flex justify-end rounded-sm items-stretch"
+      className="relative flex justify-end rounded-sm items-stretch overflow-x-clip"
       ref={elementRef}
     >
       <div
@@ -157,7 +171,7 @@ function SortableItem({ list }: { list: List }) {
             {...attributes}
             style={{ backgroundColor: "transparent" }}
           >
-            <DragHandleDots2Icon className="text-muted-foreground" />
+            <DragHandleDots2Icon className="text-muted-foreground pointer-events-none" />
           </Button>
           <p className="text-lg font-bold ml-2">{list.name}</p>
         </div>
