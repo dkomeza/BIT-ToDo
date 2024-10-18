@@ -7,6 +7,11 @@ import {
   updateList,
   updatePriority,
 } from "@/functions/lists.api";
+import {
+  fetchTasks,
+  markTaskAsComplete,
+  saveTask,
+} from "@/functions/tasks.api";
 
 export interface Task {
   id: number;
@@ -14,10 +19,14 @@ export interface Task {
   description: string;
   date: Date;
   completed: boolean;
-  listId: number; // To associate tasks with a specific list
+  list: List;
+  tags: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface List {
+  [x: string]: any;
   id: number;
   name: string;
   description?: string;
@@ -48,11 +57,16 @@ interface ToDoState {
   removeList: (id: number) => Promise<void>;
 
   // Actions for tasks
-  addTask: (task: Task) => void;
+  addTask: (task: {
+    name: string;
+    description?: string;
+    date: Date;
+    listId: number;
+  }) => Promise<void>;
+  fetchTasks: () => Promise<void>;
+  markTaskAsCompleted: (id: number, completed: boolean) => Promise<void>;
   updateTask: (id: number, updatedTask: Partial<Task>) => void;
   removeTask: (id: number) => void;
-
-  // Utility actions
   getTasksByList: (listId: number) => Task[];
 }
 
@@ -200,11 +214,11 @@ export const useToDoStore = create<ToDoState>((set, get) => ({
   // Remove a list by id
   removeList: async (id: number) => {
     const list = get().lists.find((list) => list.id === id);
-    const tasks = get().tasks.filter((task) => task.listId === id);
+    const tasks = get().tasks.filter((task) => task.list.id === id);
 
     set((state) => ({
       lists: state.lists.filter((list) => list.id !== id),
-      tasks: state.tasks.filter((task) => task.listId !== id), // Remove tasks associated with the list
+      tasks: state.tasks.filter((task) => task.list.id !== id), // Remove tasks associated with the list
     }));
 
     try {
@@ -219,11 +233,97 @@ export const useToDoStore = create<ToDoState>((set, get) => ({
   },
 
   // Add a new task
-  addTask: (task: Task) =>
-    set((state) => ({
-      tasks: [...state.tasks, task],
-    })),
+  addTask: async (task: {
+    name: string;
+    description?: string;
+    date: Date;
+    listId: number;
+  }) => {
+    const tempId = Date.now(); // Generate a temporary id
 
+    const newTask: Task = {
+      id: tempId,
+      name: task.name,
+      description: task.description || "",
+      date: task.date,
+      completed: false,
+      list: get().lists.find((list) => list.id === task.listId) as List,
+      tags: "",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    set((state) => ({
+      tasks: [...state.tasks, newTask],
+      lists: state.lists.map((list) =>
+        list.id === task.listId
+          ? { ...list, tasks: [...list.tasks, newTask] }
+          : list
+      ),
+    }));
+
+    // Save the task to the API
+    try {
+      const savedTask = await saveTask(newTask);
+
+      set((state) => ({
+        tasks: state.tasks.map((t) => (t.id === tempId ? savedTask : t)),
+        error: null,
+      }));
+    } catch (error: any) {
+      set((state) => ({
+        tasks: state.tasks.filter((t) => t.id !== tempId),
+        error: error.message,
+      }));
+    }
+  },
+  fetchTasks: async () => {
+    try {
+      const tasks = (await fetchTasks()) as Task[];
+      set({ tasks, error: null });
+    } catch (error: any) {
+      set({ error: error.message });
+    }
+  },
+  markTaskAsCompleted: async (id: number, completed: boolean) => {
+    set((state) => ({
+      tasks: state.tasks.map((task) =>
+        task.id === id ? { ...task, completed } : task
+      ),
+      lists: state.lists.map((list) => ({
+        ...list,
+        tasks: list.tasks.map((task) =>
+          task.id === id ? { ...task, completed } : task
+        ),
+      })),
+    }));
+
+    try {
+      const task = await markTaskAsComplete(id, completed) as Task;
+
+      set((state) => ({
+        tasks: state.tasks.map((t) => (t.id === id ? task : t)),
+        lists: state.lists.map((list) => ({
+          ...list,
+          tasks: list.tasks.map((t) => (t.id === id ? task : t)),
+        })),
+        error: null,
+      }));
+    } catch (error: any) {
+      set((state) => ({
+        tasks: state.tasks.map((task) =>
+          task.id === id ? { ...task, completed: !completed } : task
+        ),
+        lists: state.lists.map((list) => ({
+          ...list,
+          tasks: list.tasks.map((task) =>
+            task.id === id ? { ...task, completed: !completed } : task
+          ),
+        })),
+        error: error.message,
+      }));
+    }
+  },
   // Update an existing task
   updateTask: (id: number, updatedTask: Partial<Task>) =>
     set((state) => ({
@@ -240,7 +340,7 @@ export const useToDoStore = create<ToDoState>((set, get) => ({
 
   // Get all tasks for a specific list
   getTasksByList: (listId: number) =>
-    get().tasks.filter((task) => task.listId === listId),
+    get().tasks.filter((task) => task.list.id === listId),
 }));
 
 // Helper function to move an item in an array

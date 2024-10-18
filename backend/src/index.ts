@@ -2,7 +2,7 @@ import express from "express";
 import { AppDataSource } from "./config/db.config";
 import cookieParser from "cookie-parser";
 
-import { authRouter, listRouter } from "@/routes";
+import { authRouter, listRouter, taskRouter } from "@/routes";
 
 const app = express();
 const PORT = process.env.NODE_ENV === "test" ? 8001 : 8000;
@@ -13,6 +13,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/auth", authRouter);
 app.use("/lists", listRouter);
+app.use("/tasks", taskRouter);
 
 app.get("/status", (_req, res) => {
   res.send({

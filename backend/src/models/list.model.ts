@@ -109,6 +109,7 @@ export async function selectUserLists(user: User): Promise<List[]> {
       },
       isArchived: false,
     },
+    relations: ["tasks"],
   });
 
   return lists;

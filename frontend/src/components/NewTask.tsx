@@ -45,6 +45,7 @@ import {
   SelectValue,
 } from "./ui/select";
 import { useToDoStore } from "@/stores/ToDoStore";
+import { useState } from "react";
 
 const formSchema = z.object({
   title: z.string().min(1, {
@@ -56,7 +57,8 @@ const formSchema = z.object({
 });
 
 function NewTask() {
-  const { lists } = useToDoStore();
+  const [isOpen, setIsOpen] = useState(false);
+  const { lists, addTask } = useToDoStore();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -67,12 +69,36 @@ function NewTask() {
     },
   });
 
-  function onSubmit(data: z.infer<typeof formSchema>) {
-    console.log(data);
+  async function onSubmit(data: z.infer<typeof formSchema>) {
+    // Find the list by name
+    const list = lists.find((list) => list.name === data.list);
+    if (!list) {
+      throw new Error("List not found");
+    }
+
+    if (!data.date) {
+      throw new Error("Date is required");
+    }
+
+    await addTask({
+      name: data.title,
+      description: data.description,
+      date: data.date,
+      listId: list.id,
+    });
+
+    setIsOpen(false);
+    form.reset();
   }
 
   return (
-    <Drawer repositionInputs={false}>
+    <Drawer
+      repositionInputs={false}
+      open={isOpen}
+      onOpenChange={(open) => {
+        setIsOpen(open);
+      }}
+    >
       <DrawerTrigger asChild>
         <Button variant="outline" size="icon">
           <PlusIcon />
@@ -197,7 +223,6 @@ function NewTask() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="Home">Home</SelectItem>
                           {lists.map((list) => (
                             <SelectItem key={list.id} value={list.name}>
                               {list.name}

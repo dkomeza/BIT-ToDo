@@ -60,6 +60,10 @@ export async function createUser(data: {
   const user = userRepository.create(data);
   await userRepository.save(user);
 
+  // Create the home list for the user
+  const listRepository = AppDataSource.getRepository(List);
+  await listRepository.save({ name: "Home", user, slug: "home" });
+
   return user;
 }
 

@@ -4,6 +4,7 @@ import {
   PrimaryGeneratedColumn,
   ManyToOne,
   type Relation,
+  MoreThanOrEqual,
 } from "typeorm";
 import { AppDataSource } from "@/config/db.config";
 import { List } from "./list.model";
@@ -73,7 +74,6 @@ export async function getTask(
     id?: number;
     list?: List;
     name?: string;
-    completed?: boolean;
     date?: Date;
   }
 ) {
@@ -83,7 +83,90 @@ export async function getTask(
 
   const taskRepository = AppDataSource.getRepository(Task);
 
-  const task = await taskRepository.findOne({ where: { user, ...where } });
+  const oneDayAgo = new Date();
+  oneDayAgo.setDate(oneDayAgo.getDate() - 1);
+
+  const task = await taskRepository.findOne({
+    where: [
+      { user: { id: user.id }, ...where, completed: false },
+      {
+        user: { id: user.id },
+        ...where,
+        completed: true,
+        updatedAt: MoreThanOrEqual(oneDayAgo),
+      },
+    ],
+    relations: ["list"],
+  });
+
+  return task;
+}
+
+export async function getTasks(
+  user: User,
+  where?: {
+    id?: number;
+    list?: List;
+    name?: string;
+    completed?: boolean;
+    date?: Date;
+  }
+) {
+  if (!user) {
+    throw new Error("User must be provided to get tasks");
+  }
+
+  const taskRepository = AppDataSource.getRepository(Task);
+  const oneDayAgo = new Date();
+  oneDayAgo.setDate(oneDayAgo.getDate() - 1);
+
+  const tasks = await taskRepository.find({
+    where: [
+      { user: { id: user.id }, ...where, completed: false },
+      {
+        user: { id: user.id },
+        ...where,
+        completed: true,
+        updatedAt: MoreThanOrEqual(oneDayAgo),
+      },
+    ],
+    relations: ["list"],
+  });
+
+  return tasks;
+}
+
+export async function updateTask(
+  user: User,
+  where: { id: number },
+  data: {
+    name?: string;
+    description?: string;
+    date?: Date;
+    completed?: boolean;
+    list?: List;
+    tags?: string;
+  }
+) {
+  if (!user) {
+    throw new Error("User must be provided to update a task");
+  }
+
+  if (!where || !where.id) {
+    throw new Error("ID must be provided to update a task");
+  }
+
+  const taskRepository = AppDataSource.getRepository(Task);
+  const task = await taskRepository.findOne({
+    where: { id: where.id, user: { id: user.id } },
+    relations: ["list"],
+  });
+
+  if (!task) {
+    throw new Error("Task not found");
+  }
+  Object.assign(task, data);
+  await taskRepository.save(task);
 
   return task;
 }

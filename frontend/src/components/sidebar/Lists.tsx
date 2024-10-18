@@ -7,7 +7,6 @@ import {
 import {
   restrictToWindowEdges,
   restrictToVerticalAxis,
-  restrictToParentElement,
 } from "@dnd-kit/modifiers";
 import {
   closestCenter,
@@ -62,9 +61,12 @@ function Lists() {
         modifiers={[restrictToWindowEdges, restrictToVerticalAxis]}
       >
         <SortableContext items={lists} strategy={verticalListSortingStrategy}>
-          {lists.map((list) => (
-            <SortableItem key={list.slug} list={list} />
-          ))}
+          {lists.map(
+            (list) =>
+              list.slug !== "home" && (
+                <SortableItem key={list.slug} list={list} />
+              )
+          )}
         </SortableContext>
       </DndContext>
       <NewList />
@@ -176,7 +178,7 @@ function SortableItem({ list }: { list: List }) {
           <p className="text-lg font-bold ml-2">{list.name}</p>
         </div>
         <div className="bg-accent text-accent-foreground w-6 h-6 flex items-center justify-center text-xs rounded-sm">
-          99
+          {list.tasks ? list.tasks.filter((task) => !task.completed).length : 0}
         </div>
       </div>
       <div
@@ -278,7 +280,12 @@ function HomeItem({ lists }: { lists: List[] }) {
       </div>
       <div className="bg-accent text-accent-foreground w-6 h-6 flex items-center justify-center text-xs rounded-sm">
         {lists.reduce((acc, list) => {
-          return acc + (list.tasks ? list.tasks.length : 0);
+          return (
+            acc +
+            (list.tasks
+              ? list.tasks.filter((task) => !task.completed).length
+              : 0)
+          );
         }, 0)}
       </div>
     </div>

@@ -4,9 +4,10 @@ import { useEffect } from "react";
 import { Outlet } from "react-router-dom";
 
 function Layout() {
-  const { fetchLists, error } = useToDoStore();
+  const { fetchLists, fetchTasks, error } = useToDoStore();
   useEffect(() => {
     fetchLists();
+    fetchTasks();
   }, []);
 
   useEffect(() => {
