@@ -4,7 +4,8 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import { AuthProvider } from "@/context/AuthContext";
 
 import { lazy, Suspense } from "react";
-import Layout from "./pages/layout";
+import Layout from "./pages/Layout";
+import List from "./pages/List";
 
 const Login = lazy(() => import("./pages/Login"));
 const Signup = lazy(() => import("./pages/Signup"));
@@ -18,6 +19,7 @@ function App() {
             <Route element={<ProtectedRoute />}>
               <Route element={<Layout />}>
                 <Route path="/" element={<Home />} />
+                <Route path="/:slug" element={<List />} />
               </Route>
             </Route>
 

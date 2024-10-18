@@ -36,7 +36,7 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 
-function Lists() {
+function Lists({ setOpen }: { setOpen: (open: boolean) => void }) {
   const { lists, changeListPriority } = useToDoStore();
   const sensors = useSensors(useSensor(PointerSensor));
 
@@ -53,7 +53,7 @@ function Lists() {
 
   return (
     <div className="ml-2 flex flex-col">
-      <HomeItem lists={lists} />
+      <HomeItem lists={lists} setOpenSheet={setOpen} />
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
@@ -64,7 +64,11 @@ function Lists() {
           {lists.map(
             (list) =>
               list.slug !== "home" && (
-                <SortableItem key={list.slug} list={list} />
+                <SortableItem
+                  key={list.slug}
+                  list={list}
+                  setOpenSheet={setOpen}
+                />
               )
           )}
         </SortableContext>
@@ -74,7 +78,13 @@ function Lists() {
   );
 }
 
-function SortableItem({ list }: { list: List }) {
+function SortableItem({
+  list,
+  setOpenSheet,
+}: {
+  list: List;
+  setOpenSheet: (open: boolean) => void;
+}) {
   const { removeList } = useToDoStore();
   const [open, setOpen] = useState(false);
 
@@ -156,6 +166,7 @@ function SortableItem({ list }: { list: List }) {
         style={style}
         onClick={() => {
           router(`/${list.slug}`);
+          setOpenSheet(false);
         }}
         onTouchStart={onDragStart}
         onTouchMove={onDrag}
@@ -251,7 +262,13 @@ function SortableItem({ list }: { list: List }) {
   );
 }
 
-function HomeItem({ lists }: { lists: List[] }) {
+function HomeItem({
+  lists,
+  setOpenSheet,
+}: {
+  lists: List[];
+  setOpenSheet: (open: boolean) => void;
+}) {
   const router = useNavigate();
 
   return (
@@ -260,6 +277,7 @@ function HomeItem({ lists }: { lists: List[] }) {
       role="link"
       onClick={() => {
         router(`/`);
+        setOpenSheet(false);
       }}
     >
       <div className="flex items-center">
@@ -278,14 +296,9 @@ function HomeItem({ lists }: { lists: List[] }) {
         <p className="text-lg font-bold ml-2">Home</p>
       </div>
       <div className="bg-accent text-accent-foreground w-6 h-6 flex items-center justify-center text-xs rounded-sm">
-        {lists.reduce((acc, list) => {
-          return (
-            acc +
-            (list.tasks
-              ? list.tasks.filter((task) => !task.completed).length
-              : 0)
-          );
-        }, 0)}
+        {lists
+          .find((list) => list.slug === "home")
+          ?.tasks.filter((task) => !task.completed).length || 0}
       </div>
     </div>
   );

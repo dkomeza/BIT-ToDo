@@ -8,18 +8,20 @@ import {
 } from "@/components/ui/sheet";
 
 import { Button } from "@/components/ui/button";
-import {
-  HamburgerMenuIcon,
-} from "@radix-ui/react-icons";
+import { HamburgerMenuIcon } from "@radix-ui/react-icons";
 import AccountDropdown from "./sidebar/AccountDropdown";
 
 import Lists from "./sidebar/Lists";
 import NewTask from "./NewTask";
+import { useAuth } from "@/context/AuthContext";
+import { useState } from "react";
 
 function Sidebar() {
+  const { user } = useAuth();
+  const [open, setOpen] = useState(false);
 
   return (
-    <Sheet>
+    <Sheet open={open} onOpenChange={setOpen}>
       <div className="flex justify-between">
         <SheetTrigger asChild>
           <Button variant="outline" size="icon">
@@ -37,7 +39,7 @@ function Sidebar() {
               <div className="flex flex-col items-start">
                 <h2 className="text-2xl font-extrabold">BIT-ToDo</h2>
                 <p className="text-muted-foreground text-sm font-light">
-                  Dawid Komęza
+                  {user?.name} {user?.surname}
                 </p>
               </div>
             </div>
@@ -47,14 +49,11 @@ function Sidebar() {
         </SheetHeader>
         <div className="flex flex-col gap-4 mt-8 pl-2">
           <h3 className="text-2xl font-bold">Lists</h3>
-          <Lists />
+          <Lists setOpen={setOpen} />
         </div>
       </SheetContent>
     </Sheet>
   );
-
- 
 }
-
 
 export default Sidebar;

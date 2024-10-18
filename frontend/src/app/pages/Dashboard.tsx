@@ -2,15 +2,9 @@ import dayjs from "dayjs";
 
 import { useAuth } from "@/context/AuthContext";
 import { List, Task, useToDoStore } from "@/stores/ToDoStore";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
 import {
   CalendarIcon,
-  ChevronDownIcon,
   Cross2Icon,
   DotsHorizontalIcon,
   Pencil2Icon,
@@ -18,7 +12,6 @@ import {
 } from "@radix-ui/react-icons";
 import { useEffect, useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Accordion as TaskAccordion } from "@/components/ui/TaskAccordion";
 import {
   Accordion,
   AccordionContent,
@@ -71,7 +64,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-function getDate(date: Date) {
+export function getDate(date: Date) {
   const isThisWeek =
     dayjs(date).isBefore(dayjs().endOf("week")) &&
     dayjs(date).isAfter(dayjs().subtract(1, "day"));
@@ -87,7 +80,7 @@ function getDate(date: Date) {
   }
 }
 
-function sortTasks(tasks: Task[]) {
+export function sortTasks(tasks: Task[]) {
   return tasks.sort((a, b) => {
     if (a.completed && !b.completed) return 1;
     if (!a.completed && b.completed) return -1;
@@ -103,7 +96,7 @@ function sortTasks(tasks: Task[]) {
  * Selects all incomplete tasks and first 3 completed tasks
  * @param tasks
  */
-function selectTaskList(tasks: Task[]) {
+export function selectTaskList(tasks: Task[]) {
   const incompleteTasks = tasks.filter((task) => !task.completed);
   const completedTasks = tasks.filter((task) => task.completed).slice(0, 3);
 
@@ -150,7 +143,7 @@ function TodaysList() {
           {todayTasks.filter((task) => !task.completed).length}
         </div>
       </AccordionTrigger>
-      <AccordionContent className="flex flex-col gap-4 pt-2">
+      <AccordionContent className="flex flex-col gap-4 pt-2 pl-10">
         {selectTaskList(sortTasks(todayTasks)).map((task) => (
           <FlexibleTask task={task} key={task.id} />
         ))}
@@ -172,7 +165,7 @@ function ExpandableList({ list }: { list: List }) {
           {list.tasks ? list.tasks.filter((task) => !task.completed).length : 0}
         </div>
       </AccordionTrigger>
-      <AccordionContent className="flex flex-col gap-4 pt-2">
+      <AccordionContent className="flex flex-col gap-4 pt-2 pl-10">
         {selectTaskList(sortTasks(getTasksByList(list.id))).map((task) => (
           <FlexibleTask task={task} key={task.id} />
         ))}
@@ -190,7 +183,7 @@ const formSchema = z.object({
   list: z.string(),
 });
 
-function FlexibleTask({ task }: { task: Task }) {
+export function FlexibleTask({ task }: { task: Task }) {
   const { lists, markTaskAsCompleted, removeTask, updateTask } = useToDoStore();
   const [isEditing, setIsEditing] = useState(false);
 
@@ -238,7 +231,7 @@ function FlexibleTask({ task }: { task: Task }) {
         }
       }}
     >
-      <div className="w-full flex items-center px-4 pl-10 gap-4">
+      <div className="w-full flex items-center px-4 gap-4">
         <Checkbox
           className={`w-5 h-5 ${
             task.completed ? "opacity-40" : ""
@@ -319,9 +312,6 @@ function FlexibleTask({ task }: { task: Task }) {
                             <Button
                               variant="destructive"
                               className="w-full justify-start items-center gap-2"
-                              onClick={() => {
-                                removeTask(task.id);
-                              }}
                             >
                               <TrashIcon />
                               Delete
@@ -345,7 +335,7 @@ function FlexibleTask({ task }: { task: Task }) {
                         <Button
                           variant="destructive"
                           onClick={() => {
-                            // removeList(list.id);
+                            removeTask(task.id);
                           }}
                         >
                           Remove

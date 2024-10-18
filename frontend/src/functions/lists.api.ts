@@ -12,6 +12,12 @@ export async function fetchLists() {
   return response.json();
 }
 
+export async function fetchList(slug: string) {
+  const response = await fetch(`${url}/slug/${slug}`);
+  if (!response.ok) throw new Error("Failed to fetch list");
+  return response.json();
+}
+
 export async function saveList(list: List) {
   const response = await fetch(url, {
     method: "POST",
