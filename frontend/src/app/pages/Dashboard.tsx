@@ -16,7 +16,7 @@ import {
   Pencil2Icon,
   TrashIcon,
 } from "@radix-ui/react-icons";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Accordion as TaskAccordion } from "@/components/ui/TaskAccordion";
 import {
@@ -44,10 +44,32 @@ import {
   DialogClose,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/ui/form";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Input } from "@/components/ui/input";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 function getDate(date: Date) {
   const isThisWeek =
@@ -159,11 +181,63 @@ function ExpandableList({ list }: { list: List }) {
   );
 }
 
+const formSchema = z.object({
+  title: z.string().min(1, {
+    message: "Title is required",
+  }),
+  description: z.string().optional(),
+  date: z.coerce.date(),
+  list: z.string(),
+});
+
 function FlexibleTask({ task }: { task: Task }) {
-  const { markTaskAsCompleted, removeTask } = useToDoStore();
+  const { lists, markTaskAsCompleted, removeTask, updateTask } = useToDoStore();
+  const [isEditing, setIsEditing] = useState(false);
+
+  useEffect(() => {
+    form.setValue("title", task.name);
+    form.setValue("description", task.description);
+    form.setValue("date", new Date(task.date));
+    form.setValue("list", task.list?.name || "");
+  }, [task]);
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      title: task.name,
+      description: task.description,
+      date: task.date,
+      list: task.list?.name || "",
+    },
+  });
+
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
+    const list = lists.find((list) => list.name === data.list);
+    if (!list) {
+      throw new Error("List not found");
+    }
+
+    if (!data.date) {
+      throw new Error("Date is required");
+    }
+
+    await updateTask(task.id, {
+      name: data.title,
+      description: data.description,
+      date: data.date,
+      list: list,
+    });
+    setIsEditing(false);
+  };
 
   return (
-    <Drawer>
+    <Drawer
+      onOpenChange={(open) => {
+        if (!open) {
+          setIsEditing(false);
+        }
+      }}
+    >
       <div className="w-full flex items-center px-4 pl-10 gap-4">
         <Checkbox
           className={`w-5 h-5 ${
@@ -199,93 +273,298 @@ function FlexibleTask({ task }: { task: Task }) {
         </DrawerTrigger>
       </div>
       <DrawerContent>
-        <DrawerHeader>
-          <DrawerTitle className="flex gap-2 items-center px-4 justify-between">
-            <div className="flex items-center gap-2">
-              <Checkbox
-                className={`w-5 h-5 ${
-                  task.completed ? "opacity-40" : ""
-                } transition-opacity duration-300`}
-                checked={task.completed}
-                onCheckedChange={(checked) => {
-                  markTaskAsCompleted(task.id, checked as boolean);
-                }}
-              />
-              {task.name}
-            </div>
-            <div className="flex gap-2">
-              <Dialog>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
+        {!isEditing && (
+          <>
+            <DrawerHeader>
+              <DrawerTitle className="flex gap-2 items-center px-4 justify-between">
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    className={`w-5 h-5 ${
+                      task.completed ? "opacity-40" : ""
+                    } transition-opacity duration-300`}
+                    checked={task.completed}
+                    onCheckedChange={(checked) => {
+                      markTaskAsCompleted(task.id, checked as boolean);
+                    }}
+                  />
+                  {task.name}
+                </div>
+                <div className="flex gap-2">
+                  <Dialog>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="secondary"
+                          size="icon"
+                          className="rounded-full"
+                        >
+                          <DotsHorizontalIcon />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent>
+                        <DropdownMenuItem asChild>
+                          <Button
+                            variant="ghost"
+                            className="w-full justify-start items-center gap-2"
+                            onClick={() => {
+                              setIsEditing(true);
+                            }}
+                          >
+                            <Pencil2Icon />
+                            Edit
+                          </Button>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <DialogTrigger asChild>
+                            <Button
+                              variant="destructive"
+                              className="w-full justify-start items-center gap-2"
+                              onClick={() => {
+                                removeTask(task.id);
+                              }}
+                            >
+                              <TrashIcon />
+                              Delete
+                            </Button>
+                          </DialogTrigger>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+
+                    <DialogContent className="flex w-auto flex-col rounded-md [&>button]:hidden p-4">
+                      <DialogHeader>
+                        <DialogTitle>Are you sure?</DialogTitle>
+                        <DialogDescription>
+                          This action cannot be undone.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="flex flex-row justify-between gap-10 mt-2">
+                        <DialogClose asChild>
+                          <Button variant="outline">Cancel</Button>
+                        </DialogClose>
+                        <Button
+                          variant="destructive"
+                          onClick={() => {
+                            // removeList(list.id);
+                          }}
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                  <DrawerClose asChild>
                     <Button
                       variant="secondary"
                       size="icon"
                       className="rounded-full"
                     >
-                      <DotsHorizontalIcon />
+                      <Cross2Icon />
                     </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    <DropdownMenuItem asChild>
-                      <Button
-                        variant="ghost"
-                        className="w-full justify-start items-center gap-2"
-                      >
-                        <Pencil2Icon />
-                        Edit
-                      </Button>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <DialogTrigger asChild>
-                        <Button
-                          variant="destructive"
-                          className="w-full justify-start items-center gap-2"
-                          onClick={() => {
-                            removeTask(task.id);
-                          }}
-                        >
-                          <TrashIcon />
-                          Delete
-                        </Button>
-                      </DialogTrigger>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-
-                <DialogContent className="flex w-auto flex-col rounded-md [&>button]:hidden p-4">
-                  <DialogHeader>
-                    <DialogTitle>Are you sure?</DialogTitle>
-                    <DialogDescription>
-                      This action cannot be undone.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="flex flex-row justify-between gap-10 mt-2">
-                    <DialogClose asChild>
-                      <Button variant="outline">Cancel</Button>
-                    </DialogClose>
-                    <Button
-                      variant="destructive"
-                      onClick={() => {
-                        // removeList(list.id);
-                      }}
-                    >
-                      Remove
-                    </Button>
+                  </DrawerClose>
+                </div>
+              </DrawerTitle>
+            </DrawerHeader>
+            <div className="px-6 pb-6">
+              <div className="flex justify-between items-stretch px-4">
+                <div className="flex flex-col gap-1">
+                  <p className="text-neutral-300 font-light ml-2 text-sm">
+                    List
+                  </p>
+                  <div className="px-4 py-2 bg-secondary rounded-md w-auto">
+                    {task.list?.name || "No list"}
                   </div>
-                </DialogContent>
-              </Dialog>
-              <DrawerClose asChild>
-                <Button
-                  variant="secondary"
-                  size="icon"
-                  className="rounded-full"
-                >
-                  <Cross2Icon />
-                </Button>
-              </DrawerClose>
+                </div>
+                <Separator className="h-auto" orientation="vertical" />
+                <div className="flex flex-col">
+                  <p className="text-neutral-300 font-light ml-2 text-sm">
+                    {task.completed ? "Completed on" : "Due on"}
+                  </p>
+                  <div className="px-2 py-2 rounded-md w-auto">
+                    {task.completed
+                      ? dayjs(task.updatedAt).format("DD MMMM YYYY")
+                      : dayjs(task.date).format("DD MMMM YYYY")}
+                  </div>
+                </div>
+              </div>
+              {task.description && !isEditing ? (
+                <>
+                  <Separator className="my-2" />
+                  <div>
+                    <p className="text-neutral-300 font-light ml-2 text-sm">
+                      Description
+                    </p>
+                    <p className="px-2 py-2 rounded-md w-auto">
+                      {task.description}
+                    </p>
+                  </div>
+                </>
+              ) : null}
+              {isEditing && (
+                <Textarea
+                  className="mt-4"
+                  rows={6}
+                  placeholder="Description"
+                  // {...field}
+                />
+              )}
             </div>
-          </DrawerTitle>
-        </DrawerHeader>
+          </>
+        )}
+        {isEditing && (
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)}>
+              <DrawerHeader className="px-6">
+                <DrawerTitle>
+                  <FormField
+                    control={form.control}
+                    name="title"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage>
+                          {form.formState.errors.title?.message}
+                        </FormMessage>
+                      </FormItem>
+                    )}
+                  />
+                </DrawerTitle>
+              </DrawerHeader>
+              <div className="px-6 pb-6">
+                <div className="flex justify-between items-stretch gap-2">
+                  <FormField
+                    control={form.control}
+                    name="list"
+                    render={({ field }) => (
+                      <FormItem className="w-full">
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a verified email to display" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {lists.map((list) => (
+                              <SelectItem key={list.id} value={list.name}>
+                                {list.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  ></FormField>
+                  <Separator className="h-auto" orientation="vertical" />
+                  <FormField
+                    control={form.control}
+                    name="date"
+                    render={({ field }) => (
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button variant={"outline"} className="justify-start">
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {dayjs(field.value).format("DD MMMM YYYY")}
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="flex w-auto flex-col p-2 py-4 rounded-md [&>button]:hidden">
+                          <DialogHeader>
+                            <DialogTitle>Select a date</DialogTitle>
+                          </DialogHeader>
+                          <div className="flex flex-col">
+                            <Button
+                              className="flex justify-between"
+                              variant="ghost"
+                              onClick={() => {
+                                form.setValue("date", new Date());
+                              }}
+                            >
+                              Today
+                              <p className="text-xs text-muted-foreground">
+                                {dayjs().format("ddd")}
+                              </p>
+                            </Button>
+                            <Button
+                              className="flex justify-between"
+                              variant="ghost"
+                              onClick={() => {
+                                form.setValue(
+                                  "date",
+                                  dayjs().add(1, "day").toDate()
+                                );
+                              }}
+                            >
+                              Tomorrow
+                              <p className="text-xs text-muted-foreground">
+                                {dayjs().add(1, "day").format("ddd")}
+                              </p>
+                            </Button>
+                            <Button
+                              className="flex justify-between"
+                              variant="ghost"
+                              onClick={() => {
+                                form.setValue(
+                                  "date",
+                                  dayjs().add(7, "day").toDate()
+                                );
+                              }}
+                            >
+                              Next Week
+                              <p className="text-xs text-muted-foreground">
+                                {dayjs().add(7, "day").format("ddd DD MMM")}
+                              </p>
+                            </Button>
+                          </div>
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={(date) => {
+                              form.setValue("date", date!);
+                            }}
+                          />
+                          <DialogFooter>
+                            <DialogClose asChild>
+                              <Button variant="default">Save</Button>
+                            </DialogClose>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
+                    )}
+                  ></FormField>
+                </div>
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Textarea
+                          className="mt-4"
+                          rows={6}
+                          placeholder="Description"
+                          {...field}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="flex justify-between items-center mb-4 px-6">
+                <Button variant="outline" onClick={() => setIsEditing(false)}>
+                  Cancel
+                </Button>
+                <Button variant="default" type="submit">
+                  Save
+                </Button>
+              </div>
+            </form>
+          </Form>
+        )}
       </DrawerContent>
     </Drawer>
   );

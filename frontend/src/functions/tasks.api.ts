@@ -106,3 +106,43 @@ export async function removeTask(taskID: number) {
 
   return true;
 }
+
+export async function updateTask(
+  taskID: number,
+  data: {
+    name?: string;
+    description?: string;
+    date?: Date;
+    listId: number;
+  }
+) {
+  const response = await fetch(`${url}/${taskID}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    let data;
+
+    try {
+      // Attempt to parse the JSON response
+      data = (await response.json()) as { error?: string };
+    } catch (error) {
+      throw new Error("Failed to update task"); // Generic error message if the response isn't JSON
+    }
+
+    // Now handle any errors returned from the server
+    if (data?.error) {
+      throw new Error(data.error);
+    } else {
+      throw new Error("Failed to update task");
+    }
+  }
+
+  const updatedTask = (await response.json()) as Task;
+  if (!updatedTask.id) throw new Error("Failed to update task"); // Generic error message if the response doesn't contain an id
+  return updatedTask;
+}

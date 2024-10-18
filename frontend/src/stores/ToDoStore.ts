@@ -12,6 +12,7 @@ import {
   markTaskAsComplete,
   removeTask,
   saveTask,
+  updateTask,
 } from "@/functions/tasks.api";
 
 export interface Task {
@@ -66,7 +67,15 @@ interface ToDoState {
   }) => Promise<void>;
   fetchTasks: () => Promise<void>;
   markTaskAsCompleted: (id: number, completed: boolean) => Promise<void>;
-  updateTask: (id: number, updatedTask: Partial<Task>) => void;
+  updateTask: (
+    id: number,
+    updatedTask: {
+      name?: string;
+      description?: string;
+      date?: Date;
+      list?: List;
+    }
+  ) => Promise<void>;
   removeTask: (id: number) => Promise<void>;
   getTasksByList: (listId: number) => Task[];
 }
@@ -326,12 +335,68 @@ export const useToDoStore = create<ToDoState>((set, get) => ({
     }
   },
   // Update an existing task
-  updateTask: (id: number, updatedTask: Partial<Task>) =>
+  updateTask: async (
+    id: number,
+    updatedTask: {
+      name?: string;
+      description?: string;
+      date?: Date;
+      list?: List;
+    }
+  ) => {
+    const task = get().tasks.find((task) => task.id === id);
+    const oldTask = { ...task };
+
+    if (!task) return;
+
+    if (
+      task.name === updatedTask.name &&
+      task.description === updatedTask.description &&
+      task.date === updatedTask.date &&
+      task.list.id === updatedTask.list?.id
+    )
+      return;
+
+    task.name = updatedTask.name || task.name;
+    task.description = updatedTask.description || task.description;
+    task.date = updatedTask.date || task.date;
+    task.list = updatedTask.list || task.list;
+
     set((state) => ({
-      tasks: state.tasks.map((task) =>
-        task.id === id ? { ...task, ...updatedTask } : task
-      ),
-    })),
+      tasks: state.tasks.map((t) => (t.id === id ? task : t)),
+      lists: state.lists.map((list) => ({
+        ...list,
+        tasks: list.tasks.map((t) => (t.id === id ? task : t)),
+      })),
+    }));
+
+    try {
+      const newTask = (await updateTask(id, {
+        name: task.name,
+        description: task.description,
+        date: task.date,
+        listId: task.list.id,
+      })) as Task;
+
+      set((state) => ({
+        tasks: state.tasks.map((t) => (t.id === id ? newTask : t)),
+        lists: state.lists.map((list) => ({
+          ...list,
+          tasks: list.tasks.map((t) => (t.id === id ? newTask : t)),
+        })),
+        error: null,
+      }));
+    } catch (error: any) {
+      set((state) => ({
+        tasks: state.tasks.map((t) => (t.id === id ? oldTask : t)) as Task[],
+        lists: state.lists.map((list) => ({
+          ...list,
+          tasks: list.tasks.map((t) => (t.id === id ? oldTask : t)),
+        })) as List[],
+        error: error.message,
+      }));
+    }
+  },
 
   // Remove a task by id
   removeTask: async (id: number) => {

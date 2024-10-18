@@ -20,7 +20,7 @@ export const CreateTaskDataSchema = z.object({
 
 export const UpdateTaskDataSchema = z.object({
   name: z.string().min(1, { message: "Name is required" }).optional(),
-  date: z.date().optional(),
+  date: z.coerce.date().optional(),
   listId: z.number().optional(),
   tags: z.string().optional(),
   description: z.string().optional(),
