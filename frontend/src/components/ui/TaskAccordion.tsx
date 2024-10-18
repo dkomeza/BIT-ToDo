@@ -1,7 +1,5 @@
 import * as React from "react";
 import * as AccordionPrimitive from "@radix-ui/react-accordion";
-import { ChevronDownIcon, ChevronRightIcon } from "@radix-ui/react-icons";
-import { Button } from "@/components/ui/button";
 
 import { cn } from "@/lib/utils";
 
@@ -23,16 +21,15 @@ const AccordionTrigger = React.forwardRef<
   React.ElementRef<typeof AccordionPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Trigger>
 >(({ className, children, ...props }, ref) => (
-  <AccordionPrimitive.Header className="flex">
+  <AccordionPrimitive.Header className="w-full">
     <AccordionPrimitive.Trigger
       ref={ref}
       className={cn(
-        "w-full inline-flex items-center justify-start rounded-md focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring h-9 hover:bg-transparent [&[data-state=open]>svg]:rotate-90",
+        "flex items-center justify-between text-sm font-medium transition-all",
         className
       )}
       {...props}
     >
-      <ChevronRightIcon className="w-9 transition-transform" />
       {children}
     </AccordionPrimitive.Trigger>
   </AccordionPrimitive.Header>
@@ -48,7 +45,7 @@ const AccordionContent = React.forwardRef<
     className="overflow-hidden text-sm data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down"
     {...props}
   >
-    <div className={cn("pt-0", className)}>{children}</div>
+    <div className={cn("pb-4 pt-0", className)}>{children}</div>
   </AccordionPrimitive.Content>
 ));
 AccordionContent.displayName = AccordionPrimitive.Content.displayName;

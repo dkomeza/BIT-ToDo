@@ -80,3 +80,29 @@ export async function markTaskAsComplete(taskID: number, completed: boolean) {
   if (!data.id) throw new Error("Failed to mark task as complete"); // Generic error message if the response doesn't contain an id
   return data;
 }
+
+export async function removeTask(taskID: number) {
+  const response = await fetch(`${url}/${taskID}`, {
+    method: "DELETE",
+  });
+
+  if (!response.ok) {
+    let data;
+
+    try {
+      // Attempt to parse the JSON response
+      data = (await response.json()) as { error?: string };
+    } catch (error) {
+      throw new Error("Failed to remove task"); // Generic error message if the response isn't JSON
+    }
+
+    // Now handle any errors returned from the server
+    if (data?.error) {
+      throw new Error(data.error);
+    } else {
+      throw new Error("Failed to remove task");
+    }
+  }
+
+  return true;
+}

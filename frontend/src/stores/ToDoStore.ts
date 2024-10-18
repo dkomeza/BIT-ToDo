@@ -10,6 +10,7 @@ import {
 import {
   fetchTasks,
   markTaskAsComplete,
+  removeTask,
   saveTask,
 } from "@/functions/tasks.api";
 
@@ -66,7 +67,7 @@ interface ToDoState {
   fetchTasks: () => Promise<void>;
   markTaskAsCompleted: (id: number, completed: boolean) => Promise<void>;
   updateTask: (id: number, updatedTask: Partial<Task>) => void;
-  removeTask: (id: number) => void;
+  removeTask: (id: number) => Promise<void>;
   getTasksByList: (listId: number) => Task[];
 }
 
@@ -299,7 +300,7 @@ export const useToDoStore = create<ToDoState>((set, get) => ({
     }));
 
     try {
-      const task = await markTaskAsComplete(id, completed) as Task;
+      const task = (await markTaskAsComplete(id, completed)) as Task;
 
       set((state) => ({
         tasks: state.tasks.map((t) => (t.id === id ? task : t)),
@@ -333,10 +334,30 @@ export const useToDoStore = create<ToDoState>((set, get) => ({
     })),
 
   // Remove a task by id
-  removeTask: (id: number) =>
+  removeTask: async (id: number) => {
+    const task = get().tasks.find((task) => task.id === id);
+
     set((state) => ({
       tasks: state.tasks.filter((task) => task.id !== id),
-    })),
+      lists: state.lists.map((list) => ({
+        ...list,
+        tasks: list.tasks.filter((task) => task.id !== id),
+      })),
+    }));
+
+    try {
+      await removeTask(id);
+    } catch (error: any) {
+      set((state) => ({
+        tasks: [...state.tasks, task] as Task[],
+        lists: state.lists.map((list) => ({
+          ...list,
+          tasks: [...list.tasks, task] as Task[],
+        })),
+        error: error.message,
+      }));
+    }
+  },
 
   // Get all tasks for a specific list
   getTasksByList: (listId: number) =>

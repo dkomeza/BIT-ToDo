@@ -209,7 +209,6 @@ function SortableItem({ list }: { list: List }) {
                   className="w-[50px] h-full flex items-center justify-center"
                   onClick={(e) => {
                     e.stopPropagation();
-                    // removeList(list.id);
                   }}
                 >
                   <TrashIcon />

@@ -2,14 +2,13 @@ import { z } from "zod";
 
 import {
   createTask,
-  getTask,
+  deleteTask as deleteTaskModel,
   getTasks,
   Task,
   updateTask,
 } from "@/models/task.model";
 import { get } from "@/services/list.service";
 import { User } from "@/models/user.model";
-import { List } from "@/models/list.model";
 
 export const CreateTaskDataSchema = z.object({
   name: z.string().min(1, { message: "Name is required" }),
@@ -47,6 +46,12 @@ export async function update(user: User, taskId: number, data: UpdateTaskData) {
   const updatedTask = await updateTask(user, { id: taskId }, data);
 
   return updatedTask;
+}
+
+export async function deleteTask(user: User, taskId: number) {
+  await deleteTaskModel(user, taskId);
+
+  return;
 }
 
 export async function getUsersTasks(user: User) {

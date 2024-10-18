@@ -170,3 +170,26 @@ export async function updateTask(
 
   return task;
 }
+
+export async function deleteTask(user: User, taskId: number) {
+  if (!user) {
+    throw new Error("User must be provided to delete a task");
+  }
+
+  if (!taskId) {
+    throw new Error("ID must be provided to delete a task");
+  }
+
+  const taskRepository = AppDataSource.getRepository(Task);
+  const task = await taskRepository.findOne({
+    where: { id: taskId, user: { id: user.id } },
+  });
+
+  if (!task) {
+    throw new Error("Task not found");
+  }
+
+  await taskRepository.remove(task);
+
+  return task;
+}

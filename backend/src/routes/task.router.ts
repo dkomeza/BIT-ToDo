@@ -2,6 +2,7 @@ import { auth } from "@/middlewares/auth.middleware";
 import {
   create,
   CreateTaskDataSchema,
+  deleteTask,
   getUsersTasks,
   update,
   UpdateTaskDataSchema,
@@ -57,6 +58,23 @@ taskRouter.patch("/:id", auth, async (req, res) => {
     const task = await update(req.user!, parseInt(id), parse.data);
 
     res.send(task);
+  } catch (error: any) {
+    res.status(400).send({ error: error.message });
+  }
+});
+
+taskRouter.delete("/:id", auth, async (req, res) => {
+  const { id } = req.params;
+
+  if (!id) {
+    res.status(400).send({ error: "Task ID is required" });
+    return;
+  }
+
+  try {
+    await deleteTask(req.user!, parseInt(id));
+
+    res.send({ message: "Task deleted" });
   } catch (error: any) {
     res.status(400).send({ error: error.message });
   }
