@@ -1,0 +1,48 @@
+version: "3.1"
+
+services:
+  backend:
+    container_name: BIT-ToDo-Backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    depends_on:
+      - db
+    networks:
+      - proxy
+      - backend
+
+  web:
+    container_name: BIT-ToDo-WEB
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+      additional_contexts:
+        - frontend=./frontend
+
+    ports:
+      - "80:80"
+
+    networks:
+      - proxy
+
+    depends_on:
+      - backend
+
+  db:
+    image: postgres:13
+    container_name: BIT-ToDo-DB
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    networks:
+      - backend
+    volumes:
+      - ./backend/db/data:/var/lib/postgresql/data
+
+networks:
+  proxy:
+    driver: bridge
+  backend:
+    internal: true

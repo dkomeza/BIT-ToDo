@@ -280,15 +280,13 @@ function SortableItem({
             <></>
           </EditList>
         </ContextMenuItem>
-        <ContextMenuItem
-          asChild
-          onClick={() => {
-            setOpen(true);
-          }}
-        >
+        <ContextMenuItem asChild>
           <Button
             variant="destructive"
             className="w-full mt-2 gap-2 justify-start"
+            onClick={() => {
+              removeList(list.id);
+            }}
           >
             <TrashIcon className="w-4 h-4" />
             Remove
