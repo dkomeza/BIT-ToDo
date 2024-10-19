@@ -13,4 +13,7 @@ export const AppDataSource = new DataSource({
   synchronize: true,
   logging: false,
   entities: [__dirname + "/../models/*.model.ts"],
+  ssl: {
+    rejectUnauthorized: false,
+  },
 });

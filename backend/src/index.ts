@@ -27,7 +27,17 @@ app.use((_req, res) => {
   });
 });
 
+const connectToDatabase = async () => {
+  try {
+    await AppDataSource.initialize();
+  } catch (error) {
+    console.error("Error connecting to database", error);
+    await new Promise((resolve) => setTimeout(resolve, 5000));
+    await connectToDatabase();
+  }
+};
+
 app.listen(PORT, async () => {
-  await AppDataSource.initialize();
+  await connectToDatabase();
   console.log(`Server is running on port ${PORT}`);
 });
