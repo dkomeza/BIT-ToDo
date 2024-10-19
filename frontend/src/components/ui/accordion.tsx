@@ -1,7 +1,6 @@
 import * as React from "react";
 import * as AccordionPrimitive from "@radix-ui/react-accordion";
-import { ChevronDownIcon, ChevronRightIcon } from "@radix-ui/react-icons";
-import { Button } from "@/components/ui/button";
+import { ChevronRightIcon } from "@radix-ui/react-icons";
 
 import { cn } from "@/lib/utils";
 

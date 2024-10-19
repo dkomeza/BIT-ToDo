@@ -8,7 +8,7 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { DotsHorizontalIcon, Pencil2Icon, PlusIcon } from "@radix-ui/react-icons";
+import { DotsHorizontalIcon, Pencil2Icon } from "@radix-ui/react-icons";
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";

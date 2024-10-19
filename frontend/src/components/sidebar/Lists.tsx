@@ -19,11 +19,7 @@ import {
 
 import { useNavigate } from "react-router-dom";
 
-import {
-  DragHandleDots2Icon,
-  Pencil2Icon,
-  TrashIcon,
-} from "@radix-ui/react-icons";
+import { DragHandleDots2Icon, TrashIcon } from "@radix-ui/react-icons";
 import { Button } from "@/components/ui/button";
 import { List, useToDoStore } from "@/stores/ToDoStore";
 import NewList from "../NewList";

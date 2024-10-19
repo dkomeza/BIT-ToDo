@@ -1,3 +1,0 @@
-apis:
-  backend/openapi.yml:
-    alias: bit-todo-api

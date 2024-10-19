@@ -1,25 +1,31 @@
 # BIT-ToDo
 
-## Installation
+## Running the project
 
-### Frontend (Bun is not required but recommended)
+### Docker
+
+### Local
+
+#### Frontend (Bun is not required but recommended)
 
 ```bash
 cd frontend
 bun install
+bun run build
+bun run preview
 ```
 
-### Backend (Bun is required for the backend to work (password hashing))
+#### Backend (Bun is required for the backend to work (password hashing))
 
 ```bash
 cd backend
 bun install
-```
-
-## Usage
-```bash
-cd frontend
 bun start
 ```
 
+#### Database
+
 ```bash
+cd backend
+docker-compose up -d
+```
