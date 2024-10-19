@@ -1,11 +1,25 @@
 # BIT-ToDo
 
-## Features
+## Installation
 
-- [ ] Adding tasks
-- [ ] Removing tasks
-- [ ] Editing tasks (Tasks have a title, description, date, tag, status and priority)
-- [ ] Marking tasks as done
-- [ ] Filtering tasks by tag, status and priority
-- [ ] Sorting tasks by date, tag, status and priority
-- [ ] Have multiple lists
+### Frontend (Bun is not required but recommended)
+
+```bash
+cd frontend
+bun install
+```
+
+### Backend (Bun is required for the backend to work (password hashing))
+
+```bash
+cd backend
+bun install
+```
+
+## Usage
+```bash
+cd frontend
+bun start
+```
+
+```bash

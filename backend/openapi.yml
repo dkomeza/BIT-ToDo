@@ -1,0 +1,212 @@
+openapi: '3.0.3'
+info:
+  title: BIT-ToDo API
+  version: '1.0'
+  description: Simple API for managing tasks
+servers:
+  - url: http://localhost:3000
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: auth
+  responses:
+    user:
+      description: User object
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              id:
+                type: number
+                example: '1'
+              email:
+                type: string
+                example: 'john.doe@gmail.com'
+              name:
+                type: string
+                example: 'John'
+              surname:
+                type: string
+                example: 'Doe'
+              createdAt:
+                type: string
+                example: '2021-01-01T00:00:00.000Z'
+              updatedAt:
+                type: string
+                example: '2021-01-01T00:00:00.000Z'
+              isVerified:
+                type: boolean
+                example: true
+    task:
+      description: Task object
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              id:
+                type: number
+                example: 1
+    list:
+      description: List object
+      content:
+        application/json:
+          schema:    
+            type: object
+            properties:
+              id:
+                type: number
+                example: 1
+              name:
+                type: string
+                example: 'Shopping'
+              slug:
+                type: string
+                example: 'shopping'
+              description:
+                type: string
+                example: 'Grocery shopping'
+              tasks: 
+                type: array
+                items:
+                  $ref: '#/components/responses/task'
+              priority:
+                type: number
+                example: 1
+              createdAt:
+                type: string
+                example: '2021-01-01T00:00:00.000Z'
+              updatedAt:
+                type: string
+                example: '2021-01-01T00:00:00.000Z'
+
+paths:
+  /api/status:
+    get:
+      responses:
+        '200':
+          description: Status of the API
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Okay'
+  
+  /api/auth:
+    post:
+      description: Authenticate user
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: 'Returns the user object'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user: 
+                    $ref: '#/components/responses/user'                  
+  /api/auth/login:
+    post:
+      description: Login user
+      requestBody:
+        required: true
+        description: JSON object with email and password
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: 'john.doe@gmail.com'
+                password:
+                  type: string
+                  example: 'password'
+      responses:
+        '200':
+          description: 'Returns the user object'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user: 
+                    $ref: '#/components/responses/user'
+          headers:
+            Set-Cookie:
+              description: 'Sets the client cookie'
+              schema:
+                type: string
+                example: 'auth=eyJhbasdfasdjfjo43k124j32lkj'         
+  /api/auth/signup:
+    post:
+      description: Signup user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: 'john.doe@gmail.com'
+                password:
+                  type: string
+                  example: 'password'
+                name:
+                  type: string
+                  example: 'John'
+                surname:
+                  type: string
+                  example: 'Doe'
+      responses:
+        '200':
+          description: 'Returns the user object'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user: 
+                    $ref: '#/components/responses/user'
+  /api/auth/logout:
+    post:
+      description: Logout user
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: 'Removes the client cookie'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Logged out'
+
+  /api/lists:
+    get:
+      description: Get all user lists
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: 'Returns the list of lists'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/responses/list'
+
