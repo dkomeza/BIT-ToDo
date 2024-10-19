@@ -144,7 +144,7 @@ export async function updateTask(
     description?: string;
     date?: Date;
     completed?: boolean;
-    list?: List;
+    listId?: number;
     tags?: string;
   }
 ) {
@@ -165,6 +165,20 @@ export async function updateTask(
   if (!task) {
     throw new Error("Task not found");
   }
+
+  if (data.listId) {
+    const listRepository = AppDataSource.getRepository(List);
+    const list = await listRepository.findOne({
+      where: { id: data.listId, user: { id: user.id } },
+    });
+
+    if (!list) {
+      throw new Error("List not found");
+    }
+
+    task.list = list;
+  }
+
   Object.assign(task, data);
   await taskRepository.save(task);
 

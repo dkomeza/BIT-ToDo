@@ -8,7 +8,7 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { DotsHorizontalIcon, PlusIcon } from "@radix-ui/react-icons";
+import { DotsHorizontalIcon, Pencil2Icon, PlusIcon } from "@radix-ui/react-icons";
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -27,6 +27,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "./ui/textarea";
 import { List, useToDoStore } from "@/stores/ToDoStore";
 import { useEffect, useState } from "react";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 const formSchema = z.object({
   name: z.string().min(1, {
@@ -67,6 +68,8 @@ function EditList({
     setOpen(false);
   }
 
+  const isDesktop = useMediaQuery("(min-width: 768px)");
+
   return (
     <Drawer
       repositionInputs={false}
@@ -76,14 +79,24 @@ function EditList({
         hideButtons();
       }}
     >
-      <DrawerTrigger asChild>
-        <div className="h-full w-full flex bg-yellow-500 rounded-sm relative">
-          <div className="w-[50px] h-full flex items-center justify-center">
-            <DotsHorizontalIcon />
+      {!isDesktop && (
+        <DrawerTrigger asChild>
+          <div className="h-full w-full flex bg-yellow-500 rounded-sm relative">
+            <div className="w-[50px] h-full flex items-center justify-center">
+              <DotsHorizontalIcon />
+            </div>
+            {children}
           </div>
-          {children}
-        </div>
-      </DrawerTrigger>
+        </DrawerTrigger>
+      )}
+      {isDesktop && (
+        <DrawerTrigger asChild>
+          <Button variant="ghost" className="w-full gap-2 justify-start">
+            <Pencil2Icon className="w-4 h-4" />
+            Edit
+          </Button>
+        </DrawerTrigger>
+      )}
       <DrawerContent>
         <div className="mx-auto w-full max-w-sm">
           <DrawerHeader>

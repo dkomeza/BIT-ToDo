@@ -16,7 +16,7 @@ function Layout() {
   }, [error]);
 
   return (
-    <div className="flex flex-col sm:flex-row h-full px-4 py-6">
+    <div className="flex flex-col md:flex-row h-full px-4 py-6 md:px-0 md:py-6 md:gap-4">
       <Sidebar />
       <Outlet />
     </div>

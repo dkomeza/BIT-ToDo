@@ -48,10 +48,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       };
       setUser(data.user);
     } else {
-      const data = (await res.json()) as {
-        error: string;
-      };
-      throw new Error(data.error);
+      let data;
+
+      try {
+        data = (await res.json()) as { error: string };
+      } catch (error) {
+        throw new Error("Internal server error");
+      }
+
+      if (data?.error) {
+        throw new Error(data.error);
+      } else {
+        throw new Error("Failed to login");
+      }
     }
   };
   const register = async (

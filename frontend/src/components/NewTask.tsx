@@ -46,6 +46,7 @@ import {
 } from "./ui/select";
 import { useToDoStore } from "@/stores/ToDoStore";
 import { useState } from "react";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 const formSchema = z.object({
   title: z.string().min(1, {
@@ -91,6 +92,8 @@ function NewTask() {
     form.reset();
   }
 
+  const isDesktop = useMediaQuery("(min-width: 768px)");
+
   return (
     <Drawer
       repositionInputs={false}
@@ -100,9 +103,19 @@ function NewTask() {
       }}
     >
       <DrawerTrigger asChild>
-        <Button variant="outline" size="icon">
-          <PlusIcon />
-        </Button>
+        {isDesktop ? (
+          <Button
+            variant="outline"
+            className="gap-2 text-base border-dashed border-2"
+          >
+            <PlusIcon />
+            New task
+          </Button>
+        ) : (
+          <Button variant="outline" size="icon">
+            <PlusIcon />
+          </Button>
+        )}
       </DrawerTrigger>
       <DrawerContent>
         <div className="mx-auto w-full max-w-sm">

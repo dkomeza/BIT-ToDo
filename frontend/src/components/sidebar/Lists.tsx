@@ -19,7 +19,11 @@ import {
 
 import { useNavigate } from "react-router-dom";
 
-import { DragHandleDots2Icon, TrashIcon } from "@radix-ui/react-icons";
+import {
+  DragHandleDots2Icon,
+  Pencil2Icon,
+  TrashIcon,
+} from "@radix-ui/react-icons";
 import { Button } from "@/components/ui/button";
 import { List, useToDoStore } from "@/stores/ToDoStore";
 import NewList from "../NewList";
@@ -35,6 +39,12 @@ import {
   DialogDescription,
   DialogClose,
 } from "@/components/ui/dialog";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "../ui/context-menu";
 
 function Lists({ setOpen }: { setOpen: (open: boolean) => void }) {
   const { lists, changeListPriority } = useToDoStore();
@@ -154,111 +164,142 @@ function SortableItem({
   };
 
   return (
-    <div
-      // className="relative overflow-hidden flex justify-end rounded-sm items-stretch"
-      className="relative flex justify-end rounded-sm items-stretch overflow-x-clip"
-      ref={elementRef}
-    >
-      <div
-        className={`flex items-center justify-between mb-2 rounded-sm pr-2 cursor-pointer relative flex-grow w-full flex-shrink-0`}
-        role="link"
-        ref={setNodeRef}
-        style={style}
-        onClick={() => {
-          router(`/${list.slug}`);
-          setOpenSheet(false);
-        }}
-        onTouchStart={onDragStart}
-        onTouchMove={onDrag}
-        onTouchEnd={onDragEnd}
-      >
-        <div className="flex items-center">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-            }}
-            {...listeners}
-            {...attributes}
-            style={{ backgroundColor: "transparent" }}
-          >
-            <DragHandleDots2Icon className="text-muted-foreground pointer-events-none" />
-          </Button>
-          <p className="text-lg font-bold ml-2">{list.name}</p>
-        </div>
-        <div className="bg-accent text-accent-foreground w-6 h-6 flex items-center justify-center text-xs rounded-sm">
-          {list.tasks ? list.tasks.filter((task) => !task.completed).length : 0}
-        </div>
-      </div>
-      <div
-        className="flex-shrink-0"
-        style={{
-          width: `${-left}px`,
-        }}
-      >
-        <EditList
-          list={list}
-          hideButtons={() => {
-            animateLeft(left, 0, 100);
-          }}
+    <ContextMenu>
+      <ContextMenuTrigger asChild>
+        <div
+          className="relative flex justify-end rounded-sm items-stretch overflow-x-clip"
+          ref={elementRef}
         >
           <div
-            className={`${
-              left < -150 ? "w-full" : "w-1/2"
-            } bg-red-500 rounded-sm absolute h-full right-0 transition-all`}
+            className={`flex items-center justify-between mb-2 rounded-sm pr-2 cursor-pointer relative flex-grow w-full flex-shrink-0`}
+            role="link"
+            ref={setNodeRef}
+            style={style}
+            onClick={() => {
+              router(`/${list.slug}`);
+              setOpenSheet(false);
+            }}
+            onTouchStart={onDragStart}
+            onTouchMove={onDrag}
+            onTouchEnd={onDragEnd}
           >
-            <Dialog
-              open={open}
-              onOpenChange={(isOpen) => {
-                setOpen(isOpen);
+            <div className="flex items-center">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
+                {...listeners}
+                {...attributes}
+                style={{ backgroundColor: "transparent" }}
+              >
+                <DragHandleDots2Icon className="text-muted-foreground pointer-events-none" />
+              </Button>
+              <p className="text-lg font-bold ml-2">{list.name}</p>
+            </div>
+            <div className="bg-accent text-accent-foreground w-6 h-6 flex items-center justify-center text-xs rounded-sm">
+              {list.tasks
+                ? list.tasks.filter((task) => !task.completed).length
+                : 0}
+            </div>
+          </div>
+          <div
+            className="flex-shrink-0"
+            style={{
+              width: `${-left}px`,
+            }}
+          >
+            <EditList
+              list={list}
+              hideButtons={() => {
+                animateLeft(left, 0, 100);
               }}
             >
-              <DialogTrigger asChild>
-                <div
-                  className="w-[50px] h-full flex items-center justify-center"
-                  onClick={(e) => {
-                    e.stopPropagation();
+              <div
+                className={`${
+                  left < -150 ? "w-full" : "w-1/2"
+                } bg-red-500 rounded-sm absolute h-full right-0 transition-all`}
+              >
+                <Dialog
+                  open={open}
+                  onOpenChange={(isOpen) => {
+                    setOpen(isOpen);
                   }}
                 >
-                  <TrashIcon />
-                </div>
-              </DialogTrigger>
-              <DialogContent className="flex w-auto flex-col rounded-md [&>button]:hidden p-4">
-                <DialogHeader>
-                  <DialogTitle>Are you sure?</DialogTitle>
-                  <DialogDescription>
-                    This action cannot be undone.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="flex flex-row justify-between gap-10 mt-2">
-                  <DialogClose asChild>
-                    <Button
-                      variant="outline"
+                  <DialogTrigger asChild>
+                    <div
+                      className="w-[50px] h-full flex items-center justify-center"
                       onClick={(e) => {
                         e.stopPropagation();
-                        animateLeft(left, 0, 100);
                       }}
                     >
-                      Cancel
-                    </Button>
-                  </DialogClose>
-                  <Button
-                    variant="destructive"
-                    onClick={() => {
-                      removeList(list.id);
-                    }}
-                  >
-                    Remove
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
+                      <TrashIcon />
+                    </div>
+                  </DialogTrigger>
+                  <DialogContent className="flex w-auto flex-col rounded-md [&>button]:hidden p-4">
+                    <DialogHeader>
+                      <DialogTitle>Are you sure?</DialogTitle>
+                      <DialogDescription>
+                        This action cannot be undone.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="flex flex-row justify-between gap-10 mt-2">
+                      <DialogClose asChild>
+                        <Button
+                          variant="outline"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            animateLeft(left, 0, 100);
+                          }}
+                        >
+                          Cancel
+                        </Button>
+                      </DialogClose>
+                      <Button
+                        variant="destructive"
+                        onClick={() => {
+                          removeList(list.id);
+                        }}
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
+            </EditList>
           </div>
-        </EditList>
-      </div>
-    </div>
+        </div>
+      </ContextMenuTrigger>
+      <ContextMenuContent className="">
+        <ContextMenuItem
+          asChild
+          onClick={() => {
+            setOpen(true);
+          }}
+        >
+          <EditList list={list} hideButtons={() => {}}>
+            <></>
+          </EditList>
+        </ContextMenuItem>
+        <ContextMenuItem
+          asChild
+          onClick={() => {
+            setOpen(true);
+          }}
+        >
+          <Button
+            variant="destructive"
+            className="w-full mt-2 gap-2 justify-start"
+          >
+            <TrashIcon className="w-4 h-4" />
+            Remove
+          </Button>
+        </ContextMenuItem>
+      </ContextMenuContent>
+    </ContextMenu>
   );
 }
 
