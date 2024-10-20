@@ -4,6 +4,10 @@
 
 ### Docker
 
+```bash
+docker-compose up -d
+```
+
 ### Local
 
 #### Frontend (Bun is not required but recommended)
